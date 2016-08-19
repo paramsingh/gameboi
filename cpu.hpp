@@ -2,12 +2,14 @@ struct cpu
 {
 	uint8_t a; // accumulator
 	uint8_t b, c, d, e, h, l; // general purpose registers
+	uint8_t bootloader[256];  // saves the bootstrap program
 	uint8_t memory[65536]; // permanently banked ROM memory
 	int rom_bank; // switchable ROM bank currently in use.
 	int ram_bank; // switchable ROM bank currently in use.
 	uint16_t sp; // Stack Pointer
 	uint16_t pc; // Program Counter
 	bool carry, half_carry, subtract, zero; // flags
+	bool booting; // stores if we're in the bootstrap program or not
 	int time;
 	cpu();
 	void status();

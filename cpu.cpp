@@ -2,11 +2,15 @@ cpu::cpu()
 {
 	FILE *fp = fopen("DMG_ROM.bin", "rb");
 	// Read bootstrap program from binary
-	fread(memory, sizeof(uint8_t), 256, fp);
+	fread(bootloader, sizeof(uint8_t), 256, fp);
 	fclose(fp);
+	FILE *rom = fopen("Tetris (World).gb", "rb");
+	fread(memory, sizeof(uint8_t), 16384, rom);
+	fclose(rom);
 	pc = 0;
 	time = 0;
 	zero = carry = half_carry = subtract = 0;
+	booting = 1;
 }
 
 void cpu::status()
@@ -29,6 +33,13 @@ void cpu::status()
 uint8_t cpu::read(uint16_t addr)
 {
 	// TODO: fix read i.e make banking work
+	if (booting)
+	{
+		if (addr < 0x0100)
+			return bootloader[addr];
+		else if (pc == 0x0100)
+			booting = 0;
+	}
 	return memory[addr];
 }
 
