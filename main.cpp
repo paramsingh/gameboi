@@ -10,8 +10,16 @@ int main()
 	cpu c;
 	while (true)
 	{
-		uint8_t opcode = c.read(c.pc);
-		cout << inst_set[opcode].name << endl;
+		uint16_t opcode = c.read(c.pc);
+		// if opcode is 0xcb then we have to execute the next byte
+		// from the extended instruction set
+		if (opcode == 0xcb)
+		{
+			opcode = c.read(c.pc + 1) + 0xff;
+			c.pc += 1;
+		}
+		printf("opcode = %x\n", opcode);
+		printf("Instruction name: %s\n", inst_set[opcode].name.c_str());
 		bool executed = inst_set[opcode].func(&c);
 		// TODO:
 		// timer update
@@ -26,9 +34,9 @@ int main()
 		{
 			c.time += inst_set[opcode].cycles;
 			c.pc += inst_set[opcode].size;
-			c.status();
-			getchar();
 		}
+		c.status();
+		printf("\n");
 	}
 	return 0;
 }

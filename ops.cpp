@@ -11,7 +11,7 @@ operation op("Dummy", 0, 0, not_imp);
 bool ld(cpu* c)
 {
 	uint8_t opcode = c->read(c->pc);
-	switch(opcode)
+	switch (opcode)
 	{
 		case 0x31:
 		{
@@ -35,10 +35,7 @@ bool ld(cpu* c)
 			// load value from address at hl into a and
 			// decrement hl
 			uint16_t addr = (((uint16_t)c->h) << 8) | (c -> l);
-			printf("hello\n");
-			printf("trying to read %x\n", addr);
 			c->write(addr, c->a);
-			printf("hi\n");
 			addr--;
 			c->l = addr;
 			c->h = addr >> 8;
@@ -53,7 +50,7 @@ bool ld(cpu* c)
 bool xorop(cpu* c)
 {
 	uint8_t opcode = c->read(c->pc);
-	switch(opcode)
+	switch (opcode)
 	{
 			case 0xaf:
 			{
@@ -66,6 +63,51 @@ bool xorop(cpu* c)
 				return false;
 	}
 	c->carry = c->half_carry = c->subtract = 0;
+	return true;
+}
+
+bool bit(cpu* c)
+{
+	uint8_t opcode = c->read(c->pc);
+	switch (opcode)
+	{
+		case 0x7c:
+		{
+			// test bit 7 of H register
+			// if it is 0, set zero flag
+			// else clear zero flag
+			if ((c -> h) & (1 << 7))
+				c->zero = 0;
+			else
+				c->zero = 1;
+			break;
+		}
+		default:
+			return false;
+	}
+	return true;
+}
+
+bool jr(cpu* c)
+{
+	uint8_t opcode = c->read(c->pc);
+	switch (opcode)
+	{
+		case 0x20:
+		{
+			// jr nz nn
+			// add nn to next value of pc
+			// and jump there
+			if (c->zero == 0)
+			{
+				int8_t diff = c->read(c->pc + 1);
+				c->pc += diff;
+			}
+			break;
+		}
+		default:
+			return false;
+	}
 	return true;
 }
 
@@ -135,7 +177,7 @@ operation inst_set[512] = {
 	// 31
 	op,
 	// 32
-	op,
+	operation("JR NZ nn", 2, 8, jr),
 	// 33
 	operation("LD HL nn", 3, 12, ld),
 	// 34
@@ -829,7 +871,7 @@ operation inst_set[512] = {
 	// 378
 	op,
 	// 379
-	op,
+	operation("BIT 7, h", 1, 8, bit),
 	// 380
 	op,
 	// 381
