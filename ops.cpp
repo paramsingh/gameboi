@@ -196,6 +196,185 @@ int load_rtoc(cpu* c)
 	return 1;
 }
 
+int load_rtod(cpu* c)
+{
+	uint8_t opcode = c->read(c->pc);
+	uint8_t *from;
+	if (opcode == 0x50)
+		from = &(c->b);
+	else if (opcode == 0x51)
+		from = &(c->c);
+	else if (opcode == 0x52)
+		from = &(c->d);
+	else if (opcode == 0x53)
+		from = &(c->e);
+	else if (opcode == 0x54)
+		from = &(c->h);
+	else if (opcode == 0x55)
+		from = &(c->l);
+	else if (opcode == 0x56)
+	{
+		uint16_t addr = ((uint16_t)(c->h) << 8) | (c->l);
+		from = c->memory + addr;
+	}
+	else if (opcode == 0x57)
+		from = &(c -> a);
+	c->d = *from;
+	return 1;
+}
+
+int load_rtoe(cpu* c)
+{
+	uint8_t opcode = c->read(c->pc);
+	uint8_t *from;
+	if (opcode == 0x58)
+		from = &(c->b);
+	else if (opcode == 0x59)
+		from = &(c->c);
+	else if (opcode == 0x5a)
+		from = &(c->d);
+	else if (opcode == 0x5b)
+		from = &(c->e);
+	else if (opcode == 0x5c)
+		from = &(c->h);
+	else if (opcode == 0x5d)
+		from = &(c->l);
+	else if (opcode == 0x5e)
+	{
+		uint16_t addr = ((uint16_t)(c->h) << 8) | (c->l);
+		from = c->memory + addr;
+	}
+	else if (opcode == 0x5f)
+		from = &(c -> a);
+	c->e = *from;
+	return 1;
+}
+
+int load_rtoh(cpu* c)
+{
+	uint8_t opcode = c->read(c->pc);
+	uint8_t *from;
+	if (opcode == 0x60)
+		from = &(c->b);
+	else if (opcode == 0x61)
+		from = &(c->c);
+	else if (opcode == 0x62)
+		from = &(c->d);
+	else if (opcode == 0x63)
+		from = &(c->e);
+	else if (opcode == 0x64)
+		from = &(c->h);
+	else if (opcode == 0x65)
+		from = &(c->l);
+	else if (opcode == 0x66)
+	{
+		uint16_t addr = ((uint16_t)(c->h) << 8) | (c->l);
+		from = c->memory + addr;
+	}
+	else if (opcode == 0x67)
+		from = &(c -> a);
+	c->h = *from;
+	return 1;
+}
+
+int load_rtol(cpu* c)
+{
+	uint8_t opcode = c->read(c->pc);
+	uint8_t *from;
+	if (opcode == 0x68)
+		from = &(c->b);
+	else if (opcode == 0x69)
+		from = &(c->c);
+	else if (opcode == 0x6A)
+		from = &(c->d);
+	else if (opcode == 0x6B)
+		from = &(c->e);
+	else if (opcode == 0x6C)
+		from = &(c->h);
+	else if (opcode == 0x6D)
+		from = &(c->l);
+	else if (opcode == 0x6E)
+	{
+		uint16_t addr = ((uint16_t)(c->h) << 8) | (c->l);
+		from = c->memory + addr;
+	}
+	else if (opcode == 0x6F)
+		from = &(c -> a);
+	c->l = *from;
+	return 1;
+}
+
+int load_rtomem(cpu* c)
+{
+	uint8_t opcode = c->read(c->pc);
+	uint8_t *from;
+	if (opcode == 0x70)
+		from = &(c->b);
+	else if (opcode == 0x71)
+		from = &(c->c);
+	else if (opcode == 0x72)
+		from = &(c->d);
+	else if (opcode == 0x73)
+		from = &(c->e);
+	else if (opcode == 0x74)
+		from = &(c->h);
+	else if (opcode == 0x75)
+		from = &(c->l);
+	else if (opcode == 0x76)
+	{
+		uint16_t addr = ((uint16_t)(c->h) << 8) | (c->l);
+		from = c->memory + addr;
+	}
+	else if (opcode == 0x77)
+		from = &(c -> a);
+	uint16_t addr = (((uint16_t)(c->h)) << 8) |(c -> l);
+	c->write(addr, *from);
+	return 1;
+}
+
+int cmp(cpu* c)
+{
+	uint8_t opcode = c->read(c->pc);
+	uint8_t n;
+	if (opcode == 0xBf)
+		n = c->a;
+	else if (opcode == 0xb8)
+		n = c->b;
+	else if (opcode == 0xb9)
+		n = c->c;
+	else if (opcode == 0xba)
+		n = c->d;
+	else if (opcode == 0xbb)
+		n = c->e;
+	else if (opcode == 0xbc)
+		n = c->h;
+	else if (opcode == 0xbd)
+		n = c->l;
+	else if (opcode == 0xbe)
+	{
+		uint16_t addr = (((uint16_t)c->h) << 8) | (c -> l);
+		n = c->read(addr);
+	}
+	else if (opcode == 0xfe)
+	{
+		n = c->read(c->pc + 1);
+	}
+	if (c->a == n)
+		c->zero = 1;
+	else
+		c->zero = 0;
+	c->subtract = 1;
+	if (((c -> a) & 0xf) < (n & 0xf))
+		c->half_carry = 1;
+	else
+		c->half_carry = 0;
+	if (c->a < n)
+		c->carry = 1;
+	else
+		c->carry = 0;
+	return 1;
+}
+
 int  xorop(cpu* c)
 {
 	uint8_t opcode = c->read(c->pc);
@@ -521,7 +700,7 @@ operation inst_set[512] = {
 	// 5
 	operation("DEC B", 1, 4, dec),
 	// 6
-	operation("LD B n", 1, 8, ld),
+	operation("LD B n", 2, 8, ld),
 	// 7
 	op,
 	// 8
@@ -669,85 +848,85 @@ operation inst_set[512] = {
 	// 79
 	operation("LD C, A", 1, 4, load_rtoc),
 	// 80
-	op,
+	operation("LD D, B", 1, 4, load_rtod),
 	// 81
-	op,
+	operation("LD D, C", 1, 4, load_rtod),
 	// 82
-	op,
+	operation("LD D, D", 1, 4, load_rtod),
 	// 83
-	op,
+	operation("LD D, E", 1, 4, load_rtod),
 	// 84
-	op,
+	operation("LD D, H", 1, 4, load_rtod),
 	// 85
-	op,
+	operation("LD D, L", 1, 4, load_rtod),
 	// 86
-	op,
+	operation("LD D, (HL)", 1, 8, load_rtod),
 	// 87
-	op,
+	operation("LD D, A", 1, 4, load_rtod),
 	// 88
-	op,
+	operation("LD E, B", 1, 4, load_rtoe),
 	// 89
-	op,
+	operation("LD E, C", 1, 4, load_rtoe),
 	// 90
-	op,
+	operation("LD E, D", 1, 4, load_rtoe),
 	// 91
-	op,
+	operation("LD E, E", 1, 4, load_rtoe),
 	// 92
-	op,
+	operation("LD E, H", 1, 4, load_rtoe),
 	// 93
-	op,
+	operation("LD E, L", 1, 4, load_rtoe),
 	// 94
-	op,
+	operation("LD E, (HL)", 1 , 8, load_rtoe),
 	// 95
-	op,
+	operation("LD E, A", 1, 4, load_rtoe),
 	// 96
-	op,
+	operation("LD H, B", 1, 4, load_rtoh),
 	// 97
-	op,
+	operation("LD H, C", 1, 4, load_rtoh),
 	// 98
-	op,
+	operation("LD H, D", 1, 4, load_rtoh),
 	// 99
-	op,
+	operation("LD H, E", 1, 4, load_rtoh),
 	// 100
-	op,
+	operation("LD H, H", 1, 4, load_rtoh),
 	// 101
-	op,
+	operation("LD H, L", 1, 4, load_rtoh),
 	// 102
-	op,
+	operation("LD H, (HL)", 1, 8, load_rtoh),
 	// 103
-	op,
+	operation("LD H, A", 1, 4, load_rtoh),
 	// 104
-	op,
+	operation("LD L, B", 1, 4, load_rtol),
 	// 105
-	op,
+	operation("LD L, C", 1, 4, load_rtol),
 	// 106
-	op,
+	operation("LD L, D", 1, 4, load_rtol),
 	// 107
-	op,
+	operation("LD L, E", 1, 4, load_rtol),
 	// 108
-	op,
+	operation("LD L, H", 1, 4, load_rtol),
 	// 109
-	op,
+	operation("LD L, L", 1, 4, load_rtol),
 	// 110
-	op,
+	operation("LD L, (HL)", 1, 8, load_rtol),
 	// 111
-	op,
+	operation("LD L, A", 1, 4, load_rtol),
 	// 112
-	op,
+	operation("LD (HL), B", 1, 8, load_rtomem),
 	// 113
-	op,
+	operation("LD (HL), C", 1, 8, load_rtomem),
 	// 114
-	op,
+	operation("LD (HL), D", 1, 8, load_rtomem),
 	// 115
-	op,
+	operation("LD (HL), E", 1, 8, load_rtomem),
 	// 116
-	op,
+	operation("LD (HL), H", 1, 8, load_rtomem),
 	// 117
-	op,
+	operation("LD (HL), L", 1, 8, load_rtomem),
 	// 118
 	op,
 	// 119
-	operation("LD (HL) n", 1, 8, ld),
+	operation("LD (HL) A", 1, 8, ld),
 	// 120
 	operation("LD A, B", 1, 4, load_rtoa),
 	// 121
@@ -877,19 +1056,19 @@ operation inst_set[512] = {
 	// 183
 	op,
 	// 184
-	op,
+	operation("CMP B", 1, 4, cmp),
 	// 185
-	op,
+	operation("CMP C", 1, 4, cmp),
 	// 186
-	op,
+	operation("CMP D", 1, 4, cmp),
 	// 187
-	op,
+	operation("CMP E", 1, 4, cmp),
 	// 188
-	op,
+	operation("CMP H", 1, 4, cmp),
 	// 189
-	op,
+	operation("CMP L", 1, 4, cmp),
 	// 190
-	op,
+	operation("CMP (HL)", 1, 8, cmp),
 	// 191
 	op,
 	// 192
@@ -1017,7 +1196,7 @@ operation inst_set[512] = {
 	// 253
 	op,
 	// 254
-	op,
+	operation("CMP #", 2, 8, cmp),
 	// 255
 	op,
 	// 256

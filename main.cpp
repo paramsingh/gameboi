@@ -28,16 +28,16 @@ int main()
 		{
 			printf("opcode in hex = %x, decimal = %d\n", opcode, opcode);
 			printf("unable to execute, stopping...\n");
-        	c.status();
-	    	printf("\n");
+        	//c.status();
+	    	//printf("\n");
 			break;
 		}
 		else if(executed == 1)
 		{
-			printf("Instruction name: %s\n", inst_set[opcode].name.c_str());
+			//printf("Instruction name: %s\n", inst_set[opcode].name.c_str());
 			c.time += inst_set[opcode].cycles;
 			c.pc += inst_set[opcode].size;
-            c.status();
+            //c.status();
 
 		}
         else if(executed == 2)
@@ -46,7 +46,10 @@ int main()
         }
     //    printf("\n");
         //getchar();
+
 	}
+	for (int i = 0x8000; i <= 0x9fff; i++)
+		printf("%x\n", c.memory[i]);
 	printf("count = %d", count);
 	return 0;
 }
