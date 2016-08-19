@@ -8,7 +8,7 @@ using namespace std;
 int main()
 {
 	cpu c;
-	while (true) 
+	while (true)
 	{
 		uint8_t opcode = c.read(c.pc);
 		cout << inst_set[opcode].name << endl;
@@ -17,11 +17,13 @@ int main()
 		// timer update
 		// pc update
 		// interrupt checking
-		if (!executed) {
+		if (!executed)
+		{
 			printf("unable to execute, stopping...\n");
 			break;
 		}
-		else {
+		else
+		{
 			c.time += inst_set[opcode].cycles;
 			c.pc += inst_set[opcode].size;
 			c.status();

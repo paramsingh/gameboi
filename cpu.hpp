@@ -1,6 +1,6 @@
 struct cpu
 {
-	uint8_t a; // accumulator 
+	uint8_t a; // accumulator
 	uint8_t b, c, d, e, h, l; // general purpose registers
 	uint8_t memory[65536]; // permanently banked ROM memory
 	int rom_bank; // switchable ROM bank currently in use.
@@ -14,6 +14,7 @@ struct cpu
 	uint8_t read(uint16_t);
 	void write(uint16_t, uint8_t);
 };
+
 /*
 0x0000-0x3FFF: Permanent ROM Bank
 0x4000-0x7FFF: Area for switchable ROM banks.

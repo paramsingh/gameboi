@@ -26,13 +26,13 @@ void cpu::status()
 	printf("zero = %u\n", zero);
 }
 
-uint8_t cpu::read(uint16_t addr) 
+uint8_t cpu::read(uint16_t addr)
 {
 	// TODO: fix read i.e make banking work
 	return memory[addr];
 }
 
-void cpu::write(uint16_t addr, uint8_t val) 
+void cpu::write(uint16_t addr, uint8_t val)
 {
 	// TODO: make banking work
 	memory[addr] = val;
