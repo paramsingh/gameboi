@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
-#include "cpu.h"
+#include "cpu.hpp"
 #include "cpu.cpp"
 #include "ops.hpp"
 #include "ops.cpp"
