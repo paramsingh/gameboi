@@ -16,14 +16,9 @@ int main()
 		// from the extended instruction set
 		if (opcode == 0xcb)
 		{
-			printf("THIS IS EXTENDED!!!!\n");
 			opcode = c.read(c.pc + 1) + 0xff;
 			c.pc += 1;
 		}
-		printf("opcode in hex = %x\n", opcode);
-		if (opcode==0x11)
-			getchar();
-		printf("Instruction name: %s\n", inst_set[opcode].name.c_str());
 		int executed = inst_set[opcode].func(&c);
 		// TODO:
 		// timer update
@@ -31,6 +26,7 @@ int main()
 		// interrupt checking
 		if (executed == 0)
 		{
+			printf("opcode in hex = %x, decimal = %d\n", opcode, opcode);
 			printf("unable to execute, stopping...\n");
         	c.status();
 	    	printf("\n");
@@ -38,17 +34,18 @@ int main()
 		}
 		else if(executed == 1)
 		{
-			if (opcode==0x11)
-				count++;
+			printf("Instruction name: %s\n", inst_set[opcode].name.c_str());
 			c.time += inst_set[opcode].cycles;
 			c.pc += inst_set[opcode].size;
             c.status();
-    
+
 		}
         else if(executed == 2)
         {
             c.time += inst_set[opcode].cycles;
         }
+    //    printf("\n");
+        //getchar();
 	}
 	printf("count = %d", count);
 	return 0;

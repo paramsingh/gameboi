@@ -55,7 +55,7 @@ int ld(cpu* c)
         }
         case 0x2e:
         {
-        	
+
         	//load 8 bit immediate value in register L
         	c->l = c->read(c->pc +1);
         	break;
@@ -72,7 +72,7 @@ int ld(cpu* c)
         	//Put Accumulator value in memory addr in HL pair
         	uint16_t val = c->l | (((uint16_t)c->h) << 8);
         	c->write(val, c->a);
-        	break; 
+        	break;
         }
         case 0xe0:
         {
@@ -88,15 +88,10 @@ int ld(cpu* c)
         	c->d = c->read(c->pc+2);
         	break;
         }
-        case 0x1a: 
+        case 0x1a:
         {
         	uint16_t addr = (((uint16_t)c->d) << 8) | c->e;
         	c->a = c->read(addr);
-        	break;
-        }
-        case 0x4f:
-        {
-        	c->c = c->a;
         	break;
         }
         case 0x06:
@@ -104,9 +99,100 @@ int ld(cpu* c)
         	c->b = c->read(c->pc + 1);
         	break;
         }
+        case 0x22:
+        {
+        	// load a into (HL) and increment HL
+        	uint16_t addr = (((uint16_t)c->h)<<8) | c->l;
+        	c->write(addr, c->a);
+        	addr++;
+        	c->h = (addr >> 8);
+        	c->l = addr;
+        	break;
+        }
 		default:
 			return 0;
 	}
+	return 1;
+}
+
+int load_rtoa(cpu* c)
+{
+	uint8_t opcode = c->read(c->pc);
+	uint8_t *from;
+	if (opcode == 0x7f)
+		from = &(c->a);
+	else if (opcode == 0x78)
+		from = &(c->b);
+	else if (opcode == 0x79)
+		from = &(c->c);
+	else if (opcode == 0x7A)
+		from = &(c->d);
+	else if (opcode == 0x7B)
+		from = &(c->e);
+	else if (opcode == 0x7C)
+		from = &(c->h);
+	else if (opcode == 0x7D)
+		from = &(c->l);
+	else if (opcode == 0x7E)
+	{
+		uint16_t addr = ((uint16_t)(c->h) << 8) | (c->l);
+		from = c->memory + addr;
+	}
+	c->a = *from;
+	return 1;
+}
+
+int load_rtob(cpu* c)
+{
+	uint8_t opcode = c->read(c->pc);
+	uint8_t *from;
+	if (opcode == 0x40)
+		from = &(c->b);
+	else if (opcode == 0x41)
+		from = &(c->c);
+	else if (opcode == 0x42)
+		from = &(c->d);
+	else if (opcode == 0x43)
+		from = &(c->e);
+	else if (opcode == 0x44)
+		from = &(c->h);
+	else if (opcode == 0x45)
+		from = &(c->l);
+	else if (opcode == 0x46)
+	{
+		uint16_t addr = ((uint16_t)(c->h) << 8) | (c->l);
+		from = c->memory + addr;
+	}
+	else if (opcode == 0x47)
+		from = &(c->a);
+	c->b = *from;
+	return 1;
+}
+
+int load_rtoc(cpu* c)
+{
+	uint8_t opcode = c->read(c->pc);
+	uint8_t *from;
+	if (opcode == 0x48)
+		from = &(c->b);
+	else if (opcode == 0x49)
+		from = &(c->c);
+	else if (opcode == 0x4a)
+		from = &(c->d);
+	else if (opcode == 0x4b)
+		from = &(c->e);
+	else if (opcode == 0x4c)
+		from = &(c->h);
+	else if (opcode == 0x4d)
+		from = &(c->l);
+	else if (opcode == 0x4e)
+	{
+		uint16_t addr = ((uint16_t)(c->h) << 8) | (c->l);
+		from = c->memory + addr;
+	}
+	else if (opcode == 0x4f)
+		from = &(c -> a);
+	c->c = *from;
 	return 1;
 }
 
@@ -189,12 +275,12 @@ int inc(cpu *c)
 			//Increment register C.
 			if(c->c & 0xf == 0xf)
 				c->half_carry = 1;
-			else 
+			else
 				c->half_carry = 0;
 			c->c++;
 			if(c->c == 0)
 				c->zero = 1;
-			else 
+			else
 				c->zero = 0;
 			break;
 
@@ -204,12 +290,12 @@ int inc(cpu *c)
 			//Increment register B.
 			if(c->b & 0xf == 0xf)
 				c->half_carry = 1;
-			else 
+			else
 				c->half_carry = 0;
 			c->b++;
 			if(c->b == 0)
 				c->zero = 1;
-			else 
+			else
 				c->zero = 0;
 			break;
 		}
@@ -221,6 +307,33 @@ int inc(cpu *c)
 	c->subtract = 0;
 	return 1;
 }
+
+int inc_pair(cpu* c)
+{
+	uint8_t opcode = c->read(c->pc);
+	uint8_t *hi, *lo;
+	if (opcode == 0x03)
+		// increment the bc pair
+		hi = &(c->b), lo = &(c->c);
+	else if (opcode == 0x13)
+		// increment the de pair
+		hi = &(c->d), lo = &(c->e);
+	else if (opcode == 0x23)
+		// increment the hl pair
+		hi = &(c->h), lo = &(c->l);
+	else if (opcode == 0x33) {
+		// increment the stack pointer
+		c->sp++;
+		return 1;
+	}
+
+	uint16_t val = (((uint16_t)(*hi)) << 8) | (*lo);
+	val++;
+	*hi = val >> 8;
+	*lo = val;
+	return 1;
+}
+
 int call(cpu *c)
 {
 	// Push address of next instruction onto stack and then
@@ -238,7 +351,7 @@ int call(cpu *c)
 			c->write(c->sp, (c->pc+3));
 			uint16_t var = c->read(c->pc+1) | ((uint16_t)c->read(c->pc+2)<<8);
 			c->pc = var;
-			break; 
+			break;
 		}
 		default:
 		{
@@ -248,7 +361,7 @@ int call(cpu *c)
 	return 2;
 }
 
-int push(cpu* c) 
+int push(cpu* c)
 {
 	uint16_t opcode = c->read(c->pc);
 	switch(opcode)
@@ -269,6 +382,131 @@ int push(cpu* c)
 	return 1;
 }
 
+int rl(cpu* c)
+{
+	uint16_t opcode	= c->read(c->pc);
+	switch (opcode)
+	{
+		case 0x11:
+		{
+			// rotate c left through carry flag
+			uint16_t x = (((uint16_t)(c->c))<< 1);
+			if (c->carry == 1)
+				x |= 1;
+			if (x & (1 << 8))
+				c->carry = 1;
+			c->c = x;
+			if (c->c == 0)
+				c->zero = 1;
+			break;
+		}
+		case 0x17:
+		{
+			// rotate a left through carry flag
+			uint16_t x = (((uint16_t)(c->a))<< 1);
+			if (c->carry == 1)
+				x |= 1;
+			if (x & (1 << 8))
+				c->carry = 1;
+			c->a = x;
+			if (c->a == 0)
+				c->zero = 1;
+			break;
+		}
+		default:
+			return 0;
+	}
+	c->subtract = 0;
+	c->half_carry = 0;
+	return 1;
+}
+
+int pop(cpu* c)
+{
+	uint8_t opcode = c->read(c->pc);
+	switch (opcode)
+	{
+		case 0xc1:
+		{
+			// pop into bc
+			c->c = c->read(c->sp);
+			c->b = c->read(c->sp + 1);
+			c->sp += 2;
+			break;
+		}
+		default:
+			return 0;
+	}
+	return 1;
+}
+
+int dec(cpu* c)
+{
+	uint8_t opcode = c->read(c->pc);
+	uint8_t *reg;
+	if (opcode == 0x3d)
+		reg = &(c -> a);
+	else if (opcode == 0x05)
+		reg = &(c -> b);
+	else if (opcode == 0x0D)
+		reg = &(c -> c);
+	else if (opcode == 0x15)
+		reg = &(c -> d);
+	else if (opcode == 0x1D)
+		reg = &(c -> e);
+	else if (opcode == 0x25)
+		reg = &(c -> h);
+	else if (opcode == 0x2d)
+		reg = &(c -> l);
+	else if (opcode == 0x35)
+	{
+		uint16_t addr = (((uint16_t)c->h)<<8) | (c->l);
+		reg = c->memory + addr;
+	}
+
+	// now have to decrease value in reg by 1
+	// if the lower bits are all zero, then half carry will be set
+	if ((*reg) & 0xf == 0)
+		c->half_carry = 1;
+	else
+		c->half_carry = 0;
+	(*reg)--;
+	if (*reg == 0)
+		c->zero = 1;
+	else
+		c->zero = 0;
+	c->subtract = 1;
+	return 1;
+}
+
+int ret(cpu* c)
+{
+	uint8_t opcode = c->read(c->pc);
+	int condition = 1; // for unconditional return
+	if (opcode == 0xc0)
+		// return if z flag is reset
+		condition = !(c->zero);
+	else if (opcode == 0xc8)
+		// return if z flag is set
+		condition = c->zero;
+	else if (opcode == 0xd0)
+		// return if carry is reset
+		condition = !(c->carry);
+	else if (opcode == 0xd8)
+		// return if carry is set
+		condition = c->carry;
+
+	if (condition)
+	{
+		uint16_t lo = c->read(c->sp);
+		uint16_t hi = c->read(c->sp + 1);
+		c->sp += 2;
+		c->pc = (hi << 8) | lo;
+		return 2;
+	}
+	else
+		return 1;
+}
 operation inst_set[512] = {
 	// 0
 	op,
@@ -277,11 +515,11 @@ operation inst_set[512] = {
 	// 2
 	op,
 	// 3
-	op,
+	operation("INC BC", 1, 8, inc_pair),
 	// 4
 	operation("INC B", 1, 4, inc),
 	// 5
-	op,
+	operation("DEC B", 1, 4, dec),
 	// 6
 	operation("LD B n", 1, 8, ld),
 	// 7
@@ -297,7 +535,7 @@ operation inst_set[512] = {
 	// 12
 	operation("INC C",1,4,inc),
 	// 13
-	op,
+	operation("DEC C", 1, 4, dec),
 	// 14
 	operation("LD C n", 2, 8, ld),
 	// 15
@@ -309,15 +547,15 @@ operation inst_set[512] = {
 	// 18
 	op,
 	// 19
-	op,
+	operation("INC DE", 1, 8, inc_pair),
 	// 20
 	op,
 	// 21
-	op,
+	operation("DEC D", 1, 4, dec),
 	// 22
 	op,
 	// 23
-	op,
+	operation("RLA", 1, 4, rl),
 	// 24
 	op,
 	// 25
@@ -329,7 +567,7 @@ operation inst_set[512] = {
 	// 28
 	op,
 	// 29
-	op,
+	operation("DEC E", 1, 4, dec),
 	// 30
 	op,
 	// 31
@@ -339,13 +577,13 @@ operation inst_set[512] = {
 	// 33
 	operation("LD HL nn", 3, 12, ld),
 	// 34
-	op,
+	operation("LD (HL+), A", 1, 8, ld),
 	// 35
-	op,
+	operation("INC HL", 1, 8, inc_pair),
 	// 36
 	op,
 	// 37
-	op,
+	operation("DEC H", 1, 4, dec),
 	// 38
 	op,
 	// 39
@@ -361,7 +599,7 @@ operation inst_set[512] = {
 	// 44
 	op,
 	// 45
-	op,
+	operation("DEC L", 1, 4, dec),
 	// 46
 	operation("LD L n",2, 8, ld),
 	// 47
@@ -373,11 +611,11 @@ operation inst_set[512] = {
 	// 50
 	operation("LDD HL A", 1, 8, ld),
 	// 51
-	op,
+	operation("INC SP", 1, 8, inc_pair),
 	// 52
 	op,
 	// 53
-	op,
+	operation("DEC (HL)", 1, 12, dec),
 	// 54
 	op,
 	// 55
@@ -393,43 +631,43 @@ operation inst_set[512] = {
 	// 60
 	op,
 	// 61
-	op,
+	operation("DEC A", 1, 4, dec),
 	// 62
 	operation("LD A #", 2, 8, ld),
 	// 63
 	op,
 	// 64
-	op,
+	operation("LD B B", 1, 4, load_rtob),
 	// 65
-	op,
+	operation("LD B, C", 1, 4, load_rtob),
 	// 66
-	op,
+	operation("LD B, D", 1, 4, load_rtob),
 	// 67
-	op,
+	operation("LD B, E", 1, 4, load_rtob),
 	// 68
-	op,
+	operation("LD B, H", 1, 4, load_rtob),
 	// 69
-	op,
+	operation("LD B, L", 1, 4, load_rtob),
 	// 70
-	op,
+	operation("LD B, (HL)", 1, 8, load_rtob),
 	// 71
-	op,
+	operation("LD B, A", 1, 4, load_rtob),
 	// 72
-	op,
+	operation("LD C B", 1, 4, load_rtoc),
 	// 73
-	op,
+	operation("LD C C", 1, 4, load_rtoc),
 	// 74
-	op,
+	operation("LD C D", 1, 4, load_rtoc),
 	// 75
-	op,
+	operation("LD C E", 1, 4, load_rtoc),
 	// 76
-	op,
+	operation("LD C H", 1, 4, load_rtoc),
 	// 77
-	op,
+	operation("LD C, L", 1, 4, load_rtoc),
 	// 78
-	op,
+	operation("LD C, (HL)", 1, 8, load_rtoc),
 	// 79
-	operation("LD C, A", 1, 4, ld),
+	operation("LD C, A", 1, 4, load_rtoc),
 	// 80
 	op,
 	// 81
@@ -511,21 +749,21 @@ operation inst_set[512] = {
 	// 119
 	operation("LD (HL) n", 1, 8, ld),
 	// 120
-	op,
+	operation("LD A, B", 1, 4, load_rtoa),
 	// 121
-	op,
+	operation("LD A, C", 1, 4, load_rtoa),
 	// 122
-	op,
+	operation("LD A, D", 1, 4, load_rtoa),
 	// 123
-	op,
+	operation("LD A, E", 1, 4, load_rtoa),
 	// 124
-	op,
+	operation("LD A, H", 1, 4, load_rtoa),
 	// 125
-	op,
+	operation("LD A, L", 1, 4, load_rtoa),
 	// 126
-	op,
+	operation("LD A, (HL)", 1, 8, load_rtoa),
 	// 127
-	op,
+	operation("LD A, A", 1, 4, load_rtoa),
 	// 128
 	op,
 	// 129
@@ -655,9 +893,9 @@ operation inst_set[512] = {
 	// 191
 	op,
 	// 192
-	op,
+	operation("RET NZ", 1, 8, ret),
 	// 193
-	op,
+	operation("POP BC", 1, 12, pop),
 	// 194
 	op,
 	// 195
@@ -671,9 +909,9 @@ operation inst_set[512] = {
 	// 199
 	op,
 	// 200
-	op,
+	operation("RET Z", 1, 8, ret),
 	// 201
-	op,
+	operation("RET", 1, 8, ret),
 	// 202
 	op,
 	// 203
@@ -687,7 +925,7 @@ operation inst_set[512] = {
 	// 207
 	op,
 	// 208
-	op,
+	operation("RET NC", 1, 8, ret),
 	// 209
 	op,
 	// 210
@@ -703,7 +941,7 @@ operation inst_set[512] = {
 	// 215
 	op,
 	// 216
-	op,
+	operation("RET C", 1, 8, ret),
 	// 217
 	op,
 	// 218
@@ -815,7 +1053,7 @@ operation inst_set[512] = {
 	// 271
 	op,
 	// 272
-	op,
+	operation("RL C", 1, 8, rl),
 	// 273
 	op,
 	// 274
