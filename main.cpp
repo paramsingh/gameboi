@@ -8,6 +8,7 @@ using namespace std;
 int main()
 {
 	cpu c;
+	int count= 0;
 	while (true)
 	{
 		uint16_t opcode = c.read(c.pc);
@@ -15,10 +16,13 @@ int main()
 		// from the extended instruction set
 		if (opcode == 0xcb)
 		{
+			printf("THIS IS EXTENDED!!!!\n");
 			opcode = c.read(c.pc + 1) + 0xff;
 			c.pc += 1;
 		}
-		printf("opcode = %x\n", opcode);
+		printf("opcode in hex = %x\n", opcode);
+		if (opcode==0x11)
+			getchar();
 		printf("Instruction name: %s\n", inst_set[opcode].name.c_str());
 		int executed = inst_set[opcode].func(&c);
 		// TODO:
@@ -34,15 +38,18 @@ int main()
 		}
 		else if(executed == 1)
 		{
+			if (opcode==0x11)
+				count++;
 			c.time += inst_set[opcode].cycles;
 			c.pc += inst_set[opcode].size;
             c.status();
-            getchar();
+    
 		}
         else if(executed == 2)
         {
-            //TODO
+            c.time += inst_set[opcode].cycles;
         }
 	}
+	printf("count = %d", count);
 	return 0;
 }

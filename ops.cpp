@@ -94,6 +94,16 @@ int ld(cpu* c)
         	c->a = c->read(addr);
         	break;
         }
+        case 0x4f:
+        {
+        	c->c = c->a;
+        	break;
+        }
+        case 0x06:
+        {
+        	c->b = c->read(c->pc + 1);
+        	break;
+        }
 		default:
 			return 0;
 	}
@@ -189,6 +199,20 @@ int inc(cpu *c)
 			break;
 
 		}
+		case 0x04:
+		{
+			//Increment register B.
+			if(c->b & 0xf == 0xf)
+				c->half_carry = 1;
+			else 
+				c->half_carry = 0;
+			c->b++;
+			if(c->b == 0)
+				c->zero = 1;
+			else 
+				c->zero = 0;
+			break;
+		}
 		default:
 		{
 			return 0;
@@ -197,7 +221,53 @@ int inc(cpu *c)
 	c->subtract = 0;
 	return 1;
 }
+int call(cpu *c)
+{
+	// Push address of next instruction onto stack and then
+	//jump to address ()
+	uint8_t opcode = c->read(c->pc);
+	switch(opcode)
+	{
+		case 0xcd:
+		{
+			//Push address of next instruction onto stack and then
+			//jump to address nn.
+			c->sp --;
+			c->write(c->sp, (c->pc+3)>>8);
+			c->sp --;
+			c->write(c->sp, (c->pc+3));
+			uint16_t var = c->read(c->pc+1) | ((uint16_t)c->read(c->pc+2)<<8);
+			c->pc = var;
+			break; 
+		}
+		default:
+		{
+			return 0;
+		}
+	}
+	return 2;
+}
 
+int push(cpu* c) 
+{
+	uint16_t opcode = c->read(c->pc);
+	switch(opcode)
+	{
+		case 0xc5:
+		{
+			c->sp--;
+			c->write(c->sp, c->b);
+			c->sp--;
+			c->write(c->sp, c->c);
+			break;
+		}
+		default:
+		{
+			return 0;
+		}
+	}
+	return 1;
+}
 
 operation inst_set[512] = {
 	// 0
@@ -209,11 +279,11 @@ operation inst_set[512] = {
 	// 3
 	op,
 	// 4
-	op,
+	operation("INC B", 1, 4, inc),
 	// 5
 	op,
 	// 6
-	op,
+	operation("LD B n", 1, 8, ld),
 	// 7
 	op,
 	// 8
@@ -359,7 +429,7 @@ operation inst_set[512] = {
 	// 78
 	op,
 	// 79
-	op,
+	operation("LD C, A", 1, 4, ld),
 	// 80
 	op,
 	// 81
@@ -595,7 +665,7 @@ operation inst_set[512] = {
 	// 196
 	op,
 	// 197
-	op,
+	operation("PUSH BC", 1, 16, push),
 	// 198
 	op,
 	// 199
@@ -611,7 +681,7 @@ operation inst_set[512] = {
 	// 204
 	op,
 	// 205
-	op,
+	operation("CALL nn",3,12,call),
 	// 206
 	op,
 	// 207
