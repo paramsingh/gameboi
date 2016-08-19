@@ -1,14 +1,14 @@
-bool not_imp(cpu* c)
+int  not_imp(cpu* c)
 {
 	uint8_t opcode = c->read(c->pc);
 	printf("operation decimal : %d, hex: %x not implemented yet!\n", opcode, opcode);
-	return false;
+	return 0;
 }
 
 operation op("Dummy", 0, 0, not_imp);
 
 // Function for all load type operations
-bool ld(cpu* c)
+int ld(cpu* c)
 {
 	uint8_t opcode = c->read(c->pc);
 	switch (opcode)
@@ -95,12 +95,12 @@ bool ld(cpu* c)
         	break;
         }
 		default:
-			return false;
+			return 0;
 	}
-	return true;
+	return 1;
 }
 
-bool xorop(cpu* c)
+int  xorop(cpu* c)
 {
 	uint8_t opcode = c->read(c->pc);
 	switch (opcode)
@@ -113,13 +113,13 @@ bool xorop(cpu* c)
 				break;
 			}
 			default:
-				return false;
+				return 0;
 	}
 	c->carry = c->half_carry = c->subtract = 0;
-	return true;
+	return 1;
 }
 
-bool bit(cpu* c)
+int  bit(cpu* c)
 {
 	uint8_t opcode = c->read(c->pc);
 	switch (opcode)
@@ -136,12 +136,12 @@ bool bit(cpu* c)
 			break;
 		}
 		default:
-			return false;
+			return 0;
 	}
-	return true;
+	return 1;
 }
 
-bool jr(cpu* c)
+int jr(cpu* c)
 {
 	uint8_t opcode = c->read(c->pc);
 	switch (opcode)
@@ -159,12 +159,12 @@ bool jr(cpu* c)
 			break;
 		}
 		default:
-			return false;
+			return 0;
 	}
-	return true;
+	return 1;
 }
 
-bool inc(cpu *c)
+int inc(cpu *c)
 {
 	//flags affected
 	/* Z - Set if result is zero.
@@ -191,12 +191,13 @@ bool inc(cpu *c)
 		}
 		default:
 		{
-			return false;
+			return 0;
 		}
 	}
 	c->subtract = 0;
-	return true;
+	return 1;
 }
+
 
 operation inst_set[512] = {
 	// 0
@@ -1226,7 +1227,7 @@ operation inst_set[512] = {
 };
 
 
-operation::operation(string name, int size, int cycles, bool (*f)(cpu*))
+operation::operation(string name, int size, int cycles, int (*f)(cpu*))
 {
 	this->name = name;
 	this->size = size;

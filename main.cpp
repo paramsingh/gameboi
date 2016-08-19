@@ -18,25 +18,31 @@ int main()
 			opcode = c.read(c.pc + 1) + 0xff;
 			c.pc += 1;
 		}
-		//printf("opcode = %x\n", opcode);
-		//printf("Instruction name: %s\n", inst_set[opcode].name.c_str());
-		bool executed = inst_set[opcode].func(&c);
+		printf("opcode = %x\n", opcode);
+		printf("Instruction name: %s\n", inst_set[opcode].name.c_str());
+		int executed = inst_set[opcode].func(&c);
 		// TODO:
 		// timer update
 		// pc update
 		// interrupt checking
-		if (!executed)
+		if (executed == 0)
 		{
 			printf("unable to execute, stopping...\n");
         	c.status();
 	    	printf("\n");
 			break;
 		}
-		else
+		else if(executed == 1)
 		{
 			c.time += inst_set[opcode].cycles;
 			c.pc += inst_set[opcode].size;
+            c.status();
+            getchar();
 		}
+        else if(executed == 2)
+        {
+            //TODO
+        }
 	}
 	return 0;
 }
