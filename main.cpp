@@ -18,8 +18,8 @@ int main()
 			opcode = c.read(c.pc + 1) + 0xff;
 			c.pc += 1;
 		}
-		printf("opcode = %x\n", opcode);
-		printf("Instruction name: %s\n", inst_set[opcode].name.c_str());
+		//printf("opcode = %x\n", opcode);
+		//printf("Instruction name: %s\n", inst_set[opcode].name.c_str());
 		bool executed = inst_set[opcode].func(&c);
 		// TODO:
 		// timer update
@@ -28,6 +28,8 @@ int main()
 		if (!executed)
 		{
 			printf("unable to execute, stopping...\n");
+        	c.status();
+	    	printf("\n");
 			break;
 		}
 		else
@@ -35,8 +37,6 @@ int main()
 			c.time += inst_set[opcode].cycles;
 			c.pc += inst_set[opcode].size;
 		}
-		c.status();
-		printf("\n");
 	}
 	return 0;
 }

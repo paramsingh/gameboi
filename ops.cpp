@@ -32,7 +32,7 @@ bool ld(cpu* c)
 		}
 		case 0x32:
 		{
-			// load value from address at hl into a and
+			// load value from a into address at hl and
 			// decrement hl
 			uint16_t addr = (((uint16_t)c->h) << 8) | (c -> l);
 			c->write(addr, c->a);
@@ -41,6 +41,59 @@ bool ld(cpu* c)
 			c->h = addr >> 8;
 			break;
 		}
+        case 0x0e:
+        {
+            //load 8-bit immediate value in register C
+            c->c = c->read(c->pc+1);
+            break;
+        }
+        case 0x3e:
+        {
+        	//load 8 bit immediate value in accumulator
+        	c->a = c->read(c->pc +1);
+        	break;
+        }
+        case 0x2e:
+        {
+        	
+        	//load 8 bit immediate value in register L
+        	c->l = c->read(c->pc +1);
+        	break;
+        }
+        case 0xe2:
+        {
+        	//Put A into address $FF00 + register C
+        	c->write(0xFF00 + (uint16_t)c->c, c->a);
+        	break;
+
+        }
+        case 0x77:
+        {
+        	//Put Accumulator value in memory addr in HL pair
+        	uint16_t val = c->l | (((uint16_t)c->h) << 8);
+        	c->write(val, c->a);
+        	break; 
+        }
+        case 0xe0:
+        {
+        	//Put A into memory address $FF00+n (n is immediate 8 bit value)
+        	uint8_t n = c->read(c->pc + 1);
+        	c->write(0xff00 + (uint16_t)n, c->a);
+        	break;
+        }
+        case 0x11:
+        {
+        	// Put 16 bit immediate value at DE pair
+        	c->e = c->read(c->pc+1);
+        	c->d = c->read(c->pc+2);
+        	break;
+        }
+        case 0x1a: 
+        {
+        	uint16_t addr = (((uint16_t)c->d) << 8) | c->e;
+        	c->a = c->read(addr);
+        	break;
+        }
 		default:
 			return false;
 	}
@@ -111,6 +164,40 @@ bool jr(cpu* c)
 	return true;
 }
 
+bool inc(cpu *c)
+{
+	//flags affected
+	/* Z - Set if result is zero.
+	N - Reset.
+	H - Set if carry from bit 3.
+	C - Not affected*/
+	uint8_t opcode = c->read(c->pc);
+	switch(opcode)
+	{
+		case 0x0c:
+		{
+			//Increment register C.
+			if(c->c & 0xf == 0xf)
+				c->half_carry = 1;
+			else 
+				c->half_carry = 0;
+			c->c++;
+			if(c->c == 0)
+				c->zero = 1;
+			else 
+				c->zero = 0;
+			break;
+
+		}
+		default:
+		{
+			return false;
+		}
+	}
+	c->subtract = 0;
+	return true;
+}
+
 operation inst_set[512] = {
 	// 0
 	op,
@@ -137,17 +224,17 @@ operation inst_set[512] = {
 	// 11
 	op,
 	// 12
-	op,
+	operation("INC C",1,4,inc),
 	// 13
 	op,
 	// 14
-	op,
+	operation("LD C n", 2, 8, ld),
 	// 15
 	op,
 	// 16
 	op,
 	// 17
-	op,
+	operation("LD DE nn", 3, 12,ld),
 	// 18
 	op,
 	// 19
@@ -165,7 +252,7 @@ operation inst_set[512] = {
 	// 25
 	op,
 	// 26
-	op,
+	operation("LD A (DE)", 1, 8, ld),
 	// 27
 	op,
 	// 28
@@ -205,7 +292,7 @@ operation inst_set[512] = {
 	// 45
 	op,
 	// 46
-	op,
+	operation("LD L n",2, 8, ld),
 	// 47
 	op,
 	// 48
@@ -237,7 +324,7 @@ operation inst_set[512] = {
 	// 61
 	op,
 	// 62
-	op,
+	operation("LD A #", 2, 8, ld),
 	// 63
 	op,
 	// 64
@@ -351,7 +438,7 @@ operation inst_set[512] = {
 	// 118
 	op,
 	// 119
-	op,
+	operation("LD (HL) n", 1, 8, ld),
 	// 120
 	op,
 	// 121
@@ -561,11 +648,11 @@ operation inst_set[512] = {
 	// 223
 	op,
 	// 224
-	op,
+	operation("LD ($FF00 +n),A", 2,12,ld),
 	// 225
 	op,
 	// 226
-	op,
+	operation("LD ($FF00+C),A",1, 8, ld),
 	// 227
 	op,
 	// 228
