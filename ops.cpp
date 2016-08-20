@@ -332,6 +332,11 @@ int load_rtomem(cpu* c)
 	return 1;
 }
 
+int load_valtor(cpu* c)
+{
+	uint8_t opcode = c->read(c->pc);
+}
+
 int cmp(cpu* c)
 {
 	uint8_t opcode = c->read(c->pc);
@@ -418,24 +423,28 @@ int  bit(cpu* c)
 
 int jr(cpu* c)
 {
+	// add value n to the pc according to some condition
 	uint8_t opcode = c->read(c->pc);
-	switch (opcode)
-	{
-		case 0x20:
-		{
-			// jr nz nn
-			// add nn to next value of pc
-			// and jump there
-			if (c->zero == 0)
-			{
-				int8_t diff = c->read(c->pc + 1);
-				c->pc += diff;
-			}
-			break;
-		}
-		default:
-			return 0;
-	}
+
+	int condition;
+	if (opcode == 0x18)
+		// jump unconditionally
+		condition = 1;
+	else if (opcode == 0x20)
+		// jump if zero is reset
+		condition = !(c->zero);
+	else if (opcode == 0x28)
+		// jump if zero is set
+		condition = (c->zero);
+	else if (opcode == 0x30)
+		// jump if carry is reset
+		condition = !(c->carry);
+	else if (opcode == 0x38)
+		// jump if carry is set
+		condition = (c->carry);
+
+	if (condition)
+		c->pc += (int8_t)c->read(c->pc + 1);
 	return 1;
 }
 
@@ -681,13 +690,42 @@ int ret(cpu* c)
 	else
 		return 1;
 }
+
+int load_atomem(cpu* c)
+{
+	// write a to the memory address in register pairs
+	// or immediate values according to opcodes
+	// does not affect any flags
+
+	// note: opcode 0x77 LD (HL) A is reimplemented here
+	// but the one used is present in the function load_rtomem
+	// the one here is not used in the emulation process.
+	uint8_t opcode = c->read(c->pc);
+	uint16_t hi, lo;
+	if (opcode == 0x02)
+		hi = c->b, lo = c->c;
+	else if (opcode == 0x12)
+		hi = c->d, lo = c->e;
+	else if (opcode == 0x77)
+		hi = c->h, lo = c->l;
+	else if (opcode == 0xea)
+		lo = c->read(c->pc + 1), lo = c->read(c->pc + 2);
+
+	// get the address from the high and low bytes.
+	uint16_t addr = (hi << 8) | lo;
+	// write the accumulator to the address
+	c->write(addr, c->a);
+	return 1;
+}
+
+
 operation inst_set[512] = {
 	// 0
 	op,
 	// 1
 	op,
 	// 2
-	op,
+	operation("LD (BC) A", 1, 8, load_atomem),
 	// 3
 	operation("INC BC", 1, 8, inc_pair),
 	// 4
@@ -719,7 +757,7 @@ operation inst_set[512] = {
 	// 17
 	operation("LD DE nn", 3, 12,ld),
 	// 18
-	op,
+	operation("LD (DE) A", 1, 8, load_atomem),
 	// 19
 	operation("INC DE", 1, 8, inc_pair),
 	// 20
@@ -731,7 +769,7 @@ operation inst_set[512] = {
 	// 23
 	operation("RLA", 1, 4, rl),
 	// 24
-	op,
+	operation("JR n", 2, 8, jr),
 	// 25
 	op,
 	// 26
@@ -747,7 +785,7 @@ operation inst_set[512] = {
 	// 31
 	op,
 	// 32
-	operation("JR NZ nn", 2, 8, jr),
+	operation("JR NZ n", 2, 8, jr),
 	// 33
 	operation("LD HL nn", 3, 12, ld),
 	// 34
@@ -763,7 +801,7 @@ operation inst_set[512] = {
 	// 39
 	op,
 	// 40
-	op,
+	operation("JR Z n", 2, 8, jr),
 	// 41
 	op,
 	// 42
@@ -779,7 +817,7 @@ operation inst_set[512] = {
 	// 47
 	op,
 	// 48
-	op,
+	operation("JR NC n", 2, 8, jr),
 	// 49
 	operation("LD SP nn", 3, 12, ld),
 	// 50
@@ -795,7 +833,7 @@ operation inst_set[512] = {
 	// 55
 	op,
 	// 56
-	op,
+	operation("JR C n", 2, 8, jr),
 	// 57
 	op,
 	// 58
@@ -1151,7 +1189,7 @@ operation inst_set[512] = {
 	// 233
 	op,
 	// 234
-	op,
+	operation("LD (nn) A", 3, 16, load_atomem),
 	// 235
 	op,
 	// 236
