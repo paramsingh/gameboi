@@ -447,42 +447,37 @@ int inc(cpu *c)
 	H - Set if carry from bit 3.
 	C - Not affected*/
 	uint8_t opcode = c->read(c->pc);
-	switch(opcode)
+	uint8_t *reg;
+	if (opcode == 0x3c)
+		reg = &(c -> a);
+	else if (opcode == 0x04)
+		reg = &(c -> b);
+	else if (opcode == 0x0c)
+		reg = &(c -> c);
+	else if (opcode == 0x14)
+		reg = &(c -> d);
+	else if (opcode == 0x1c)
+		reg = &(c -> e);
+	else if (opcode == 0x24)
+		reg = &(c -> h);
+	else if (opcode == 0x2c)
+		reg = &(c -> l);
+	else if (opcode == 0x34)
 	{
-		case 0x0c:
-		{
-			//Increment register C.
-			if(c->c & 0xf == 0xf)
-				c->half_carry = 1;
-			else
-				c->half_carry = 0;
-			c->c++;
-			if(c->c == 0)
-				c->zero = 1;
-			else
-				c->zero = 0;
-			break;
-
-		}
-		case 0x04:
-		{
-			//Increment register B.
-			if(c->b & 0xf == 0xf)
-				c->half_carry = 1;
-			else
-				c->half_carry = 0;
-			c->b++;
-			if(c->b == 0)
-				c->zero = 1;
-			else
-				c->zero = 0;
-			break;
-		}
-		default:
-		{
-			return 0;
-		}
+		uint16_t addr = (((uint16_t)c->h)<<8) | (c->l);
+		reg = c->memory + addr;
 	}
+	// now have to increase value in reg by 1
+	// if the lower bits are all one, then half carry will be set
+	if ((*reg) & 0xf == 1)
+		c->half_carry = 1;
+	else
+		c->half_carry = 0;
+	(*reg)++;
+	if (*reg == 0)
+		c->zero = 1;
+	else
+		c->zero = 0;
 	c->subtract = 0;
 	return 1;
 }
@@ -728,7 +723,7 @@ operation inst_set[512] = {
 	// 19
 	operation("INC DE", 1, 8, inc_pair),
 	// 20
-	op,
+	operation("INC D", 1, 4, inc),
 	// 21
 	operation("DEC D", 1, 4, dec),
 	// 22
@@ -744,7 +739,7 @@ operation inst_set[512] = {
 	// 27
 	op,
 	// 28
-	op,
+	operation("INC E", 1, 4, inc),
 	// 29
 	operation("DEC E", 1, 4, dec),
 	// 30
@@ -760,7 +755,7 @@ operation inst_set[512] = {
 	// 35
 	operation("INC HL", 1, 8, inc_pair),
 	// 36
-	op,
+	operation("INC H", 1, 4, inc),
 	// 37
 	operation("DEC H", 1, 4, dec),
 	// 38
@@ -776,7 +771,7 @@ operation inst_set[512] = {
 	// 43
 	op,
 	// 44
-	op,
+	operation("INC L", 1, 4, inc),
 	// 45
 	operation("DEC L", 1, 4, dec),
 	// 46
@@ -792,7 +787,7 @@ operation inst_set[512] = {
 	// 51
 	operation("INC SP", 1, 8, inc_pair),
 	// 52
-	op,
+	operation("INC (HL)", 1, 12, inc),
 	// 53
 	operation("DEC (HL)", 1, 12, dec),
 	// 54
@@ -808,7 +803,7 @@ operation inst_set[512] = {
 	// 59
 	op,
 	// 60
-	op,
+	operation("INC A",1,4,inc),
 	// 61
 	operation("DEC A", 1, 4, dec),
 	// 62
