@@ -21,7 +21,7 @@ int jr(cpu* c)
         condition = (c->carry);
 
     if (condition)
-        c->pc += (int8_t)c->read(c->pc + 1);
+        c->pc += (int8_t)(c->read(c->pc + 1));
     return 1;
 }
 

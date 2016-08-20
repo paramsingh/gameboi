@@ -361,3 +361,13 @@ int load_memtor(cpu* c)
     *reg = c->read(c->pc + 1);
     return 1;
 }
+
+int ldh_an(cpu* c)
+{
+    // opcode 0xf0
+    // Put value at 0xff00 + n in A
+    uint16_t addr = c->read(c->pc + 1) + (uint16_t)0xff00;
+    uint8_t val = c->read(addr);
+    c->a = val;
+    return 1;
+}

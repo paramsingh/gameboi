@@ -493,7 +493,7 @@ operation inst_set[512] = {
 	// 239
 	op,
 	// 240
-	op,
+	operation("LDH A, (n)", 2, 12, ldh_an),
 	// 241
 	op,
 	// 242

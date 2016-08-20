@@ -2,8 +2,8 @@
 using namespace std;
 #include "cpu.hpp"
 #include "cpu.cpp"
-#include "ops.hpp"
-#include "ops.cpp"
+#include "ops/ops.hpp"
+#include "ops/ops.cpp"
 
 int main()
 {
@@ -44,7 +44,7 @@ int main()
         {
             c.time += inst_set[opcode].cycles;
         }
-        printf("\n");
+        //printf("pc = %x\n", c.pc);
         //getchar();
 
 	}
