@@ -47,7 +47,21 @@ uint8_t cpu::read(uint16_t addr)
 void cpu::write(uint16_t addr, uint8_t val)
 {
 	// TODO: make banking work
-	memory[addr] = val;
+
+	// no writing to read only memory
+	if (addr < 0x8000)
+		return;
+	else if (addr >= 0xe000 && addr < 0xfe00) // echo ram
+	{
+		memory[addr] = val;
+		write(addr - 0x2000, val);
+	}
+	else if (addr >= 0xfea0 && addr < 0xfeff) // restricted area
+		return;
+	else if (addr == 0xff44) // tries to write to the scanline register
+		memory[addr] = 0;
+	else
+		memory[addr] = val;
 }
 
 // flag register format is the following

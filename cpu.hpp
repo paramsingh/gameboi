@@ -11,6 +11,7 @@ struct cpu
 	bool carry, half_carry, subtract, zero; // flags
 	bool booting; // stores if we're in the bootstrap program or not
 	int time;
+	int enable_interrupts;
 
 	// constructor
 	cpu();
@@ -30,6 +31,17 @@ struct cpu
 	uint8_t get_f();
 	// set the value of the flag register
 	void set_f(uint8_t);
+
+
+	// Interrupts
+	// handle interrupts
+	void do_interrupts();
+
+	// request interrupt
+	void request_interrupt(int id);
+
+	// service interrupt
+	void service_interrupt(int id);
 
 };
 

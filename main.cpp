@@ -38,11 +38,8 @@ int main()
 		}
 		else if(executed == 1)
 		{
-
 			c.time += c.t;
 			c.pc += inst_set[opcode].size;
-
-
 		}
         else if(executed == 2)
         {
