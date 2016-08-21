@@ -11,10 +11,26 @@ struct cpu
 	bool carry, half_carry, subtract, zero; // flags
 	bool booting; // stores if we're in the bootstrap program or not
 	int time;
+
+	// constructor
 	cpu();
+
+	// print the status of the cpu
 	void status();
+
+	// read and write 8 bit values into memory
 	uint8_t read(uint16_t);
 	void write(uint16_t, uint8_t);
+
+	// variable to save the number of cycles taken by last instruction
+	// need to store this because it is used in gpu emulation also
+	uint8_t t;
+
+	// get the value of the flag register at the current time
+	uint8_t get_f();
+	// set the value of the flag register
+	void set_f(uint8_t);
+
 };
 
 /*

@@ -4,8 +4,9 @@ cpu::cpu()
 	// Read bootstrap program from binary
 	fread(bootloader, sizeof(uint8_t), 256, fp);
 	fclose(fp);
+	// Tetris has no banking so we can read it all the way
 	FILE *rom = fopen("Tetris (World).gb", "rb");
-	fread(memory, sizeof(uint8_t), 16384, rom);
+	fread(memory, sizeof(uint8_t), 32768, rom);
 	fclose(rom);
 	pc = 0;
 	time = 0;
@@ -47,4 +48,29 @@ void cpu::write(uint16_t addr, uint8_t val)
 {
 	// TODO: make banking work
 	memory[addr] = val;
+}
+
+// flag register format is the following
+// Z N H C X X X
+
+// convert the flag variables into the actual flag register
+// value and return it;
+uint8_t cpu::get_f()
+{
+
+	uint8_t val = 0;
+	val |= (zero << 7);
+	val |= (subtract << 6);
+	val |= (half_carry << 5);
+	val |= (carry << 4);
+	return val;
+}
+
+// set the flag register to the given value
+void cpu::set_f(uint8_t val)
+{
+	zero       = (val >> 7) & 1;
+	subtract   = (val >> 6) & 1;
+	half_carry = (val >> 5) & 1;
+	carry      = (val >> 4) & 1;
 }

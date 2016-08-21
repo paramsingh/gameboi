@@ -1,32 +1,79 @@
 // This file contains all the load operations
 
 // Function for all load type operations
+
+int load_pair(cpu* c)
+{
+    // load given register pair with 2 byte immediate value
+    uint8_t opcode = c->read(c->pc);
+    uint8_t *hi, *lo;
+    c->t = 12;
+    if (opcode == 0x01)
+        hi = &(c->b), lo = &(c->c);
+    else if (opcode == 0x11)
+        hi = &(c->d), lo = &(c->e);
+    else if (opcode == 0x21)
+        hi = &(c->h), lo = &(c->l);
+
+    *lo = c->read(c->pc + 1);
+    *hi = c->read(c->pc + 2);
+    return 1;
+}
+
+int load_sp(cpu* c)
+{
+    uint8_t opcode = c->read(c->pc);
+    uint8_t hi, lo;
+    if (opcode == 0x31)
+    {
+        c->t = 12;
+        lo = c->read(c->pc + 1);
+        hi = c->read(c->pc + 2);
+    }
+    else if (opcode == 0xf9)
+    {
+        c->t = 8;
+        lo = c->l;
+        hi = c->h;
+    }
+    uint16_t val = hi;
+    val = (val << 8) | lo;
+    c->sp = val;
+    return 1;
+}
+
+int load_aindirect(cpu* c)
+{
+    uint8_t opcode = c->read(c->pc);
+    uint16_t hi, lo;
+    c->t = 8;
+    if (opcode == 0x0a)
+        hi = c->b, lo = c->c;
+    else if (opcode == 0x1a)
+        hi = c->d, lo = c->e;
+    else if (opcode == 0x7e)
+        hi = c->h, lo = c->l;
+    else if (opcode == 0xfa)
+    {
+        c->t = 16;
+        lo = c->read(c->pc + 1);
+        hi = c->read(c->pc + 2);
+    }
+    uint16_t addr = (hi << 8) | lo;
+    c->a = c->read(addr);
+    return 1;
+}
+
 int ld(cpu* c)
 {
     uint8_t opcode = c->read(c->pc);
     switch (opcode)
     {
-        case 0x31:
-        {
-            // this loads the stack pointer with 2 byte immediate value
-            // assuming that lower bits are given first
-            uint16_t low = c->read(c->pc + 1);
-            uint16_t high = c->read(c->pc + 2);
-            low = (high << 8) | low;
-            c->sp = low;
-            break;
-        }
-        case 0x21:
-        {
-            // LD HL nn
-            c->l = c->read(c ->pc + 1);
-            c->h = c->read(c->pc + 2);
-            break;
-        }
         case 0x32:
         {
             // load value from a into address at hl and
             // decrement hl
+            c->t = 8;
             uint16_t addr = (((uint16_t)c->h) << 8) | (c -> l);
             c->write(addr, c->a);
             addr--;
@@ -34,49 +81,26 @@ int ld(cpu* c)
             c->h = addr >> 8;
             break;
         }
-        case 0x0e:
-        {
-            //load 8-bit immediate value in register C
-            c->c = c->read(c->pc+1);
-            break;
-        }
         case 0xe2:
         {
             //Put A into address $FF00 + register C
+            c->t = 8;
             c->write(0xFF00 + (uint16_t)c->c, c->a);
             break;
 
         }
-        case 0x77:
-        {
-            //Put Accumulator value in memory addr in HL pair
-            uint16_t val = c->l | (((uint16_t)c->h) << 8);
-            c->write(val, c->a);
-            break;
-        }
         case 0xe0:
         {
             //Put A into memory address $FF00+n (n is immediate 8 bit value)
+            c->t = 12;
             uint8_t n = c->read(c->pc + 1);
             c->write(0xff00 + (uint16_t)n, c->a);
-            break;
-        }
-        case 0x11:
-        {
-            // Put 16 bit immediate value at DE pair
-            c->e = c->read(c->pc+1);
-            c->d = c->read(c->pc+2);
-            break;
-        }
-        case 0x1a:
-        {
-            uint16_t addr = (((uint16_t)c->d) << 8) | c->e;
-            c->a = c->read(addr);
             break;
         }
         case 0x22:
         {
             // load a into (HL) and increment HL
+            c->t = 8;
             uint16_t addr = (((uint16_t)c->h)<<8) | c->l;
             c->write(addr, c->a);
             addr++;
@@ -96,6 +120,7 @@ int load_rtoa(cpu* c)
 {
     uint8_t opcode = c->read(c->pc);
     uint8_t *from;
+    c->t = 4;
     if (opcode == 0x7f)
         from = &(c->a);
     else if (opcode == 0x78)
@@ -112,6 +137,7 @@ int load_rtoa(cpu* c)
         from = &(c->l);
     else if (opcode == 0x7E)
     {
+        c->t = 8;
         uint16_t addr = ((uint16_t)(c->h) << 8) | (c->l);
         from = c->memory + addr;
     }
@@ -123,6 +149,7 @@ int load_rtob(cpu* c)
 {
     uint8_t opcode = c->read(c->pc);
     uint8_t *from;
+    c->t = 4;
     if (opcode == 0x40)
         from = &(c->b);
     else if (opcode == 0x41)
@@ -137,6 +164,7 @@ int load_rtob(cpu* c)
         from = &(c->l);
     else if (opcode == 0x46)
     {
+        c->t = 8;
         uint16_t addr = ((uint16_t)(c->h) << 8) | (c->l);
         from = c->memory + addr;
     }
@@ -150,6 +178,7 @@ int load_rtoc(cpu* c)
 {
     uint8_t opcode = c->read(c->pc);
     uint8_t *from;
+    c->t = 4;
     if (opcode == 0x48)
         from = &(c->b);
     else if (opcode == 0x49)
@@ -164,6 +193,7 @@ int load_rtoc(cpu* c)
         from = &(c->l);
     else if (opcode == 0x4e)
     {
+        c->t = 8;
         uint16_t addr = ((uint16_t)(c->h) << 8) | (c->l);
         from = c->memory + addr;
     }
@@ -177,6 +207,7 @@ int load_rtod(cpu* c)
 {
     uint8_t opcode = c->read(c->pc);
     uint8_t *from;
+    c->t = 4;
     if (opcode == 0x50)
         from = &(c->b);
     else if (opcode == 0x51)
@@ -191,6 +222,7 @@ int load_rtod(cpu* c)
         from = &(c->l);
     else if (opcode == 0x56)
     {
+        c->t = 8;
         uint16_t addr = ((uint16_t)(c->h) << 8) | (c->l);
         from = c->memory + addr;
     }
@@ -202,6 +234,7 @@ int load_rtod(cpu* c)
 
 int load_rtoe(cpu* c)
 {
+    c->t = 4;
     uint8_t opcode = c->read(c->pc);
     uint8_t *from;
     if (opcode == 0x58)
@@ -218,6 +251,7 @@ int load_rtoe(cpu* c)
         from = &(c->l);
     else if (opcode == 0x5e)
     {
+        c->t = 8;
         uint16_t addr = ((uint16_t)(c->h) << 8) | (c->l);
         from = c->memory + addr;
     }
@@ -229,6 +263,7 @@ int load_rtoe(cpu* c)
 
 int load_rtoh(cpu* c)
 {
+    c->t = 4;
     uint8_t opcode = c->read(c->pc);
     uint8_t *from;
     if (opcode == 0x60)
@@ -245,6 +280,7 @@ int load_rtoh(cpu* c)
         from = &(c->l);
     else if (opcode == 0x66)
     {
+        c->t = 8;
         uint16_t addr = ((uint16_t)(c->h) << 8) | (c->l);
         from = c->memory + addr;
     }
@@ -256,6 +292,7 @@ int load_rtoh(cpu* c)
 
 int load_rtol(cpu* c)
 {
+    c->t = 4;
     uint8_t opcode = c->read(c->pc);
     uint8_t *from;
     if (opcode == 0x68)
@@ -272,6 +309,7 @@ int load_rtol(cpu* c)
         from = &(c->l);
     else if (opcode == 0x6E)
     {
+        c->t = 8;
         uint16_t addr = ((uint16_t)(c->h) << 8) | (c->l);
         from = c->memory + addr;
     }
@@ -283,6 +321,7 @@ int load_rtol(cpu* c)
 
 int load_rtomem(cpu* c)
 {
+    c->t = 8;
     uint8_t opcode = c->read(c->pc);
     uint8_t *from;
     if (opcode == 0x70)
@@ -299,6 +338,7 @@ int load_rtomem(cpu* c)
         from = &(c->l);
     else if (opcode == 0x76)
     {
+        c->t = 12;
         uint16_t addr = ((uint16_t)(c->h) << 8) | (c->l);
         from = c->memory + addr;
     }
@@ -320,6 +360,7 @@ int load_atomem(cpu* c)
     // the one here is not used in the emulation process.
     uint8_t opcode = c->read(c->pc);
     uint16_t hi, lo;
+    c->t = 8;
     if (opcode == 0x02)
         hi = c->b, lo = c->c;
     else if (opcode == 0x12)
@@ -327,7 +368,10 @@ int load_atomem(cpu* c)
     else if (opcode == 0x77)
         hi = c->h, lo = c->l;
     else if (opcode == 0xea)
+    {
+        c->t = 16;
         lo = c->read(c->pc + 1), lo = c->read(c->pc + 2);
+    }
 
     // get the address from the high and low bytes.
     uint16_t addr = (hi << 8) | lo;
@@ -341,6 +385,7 @@ int load_memtor(cpu* c)
 {
     // loads immediate value to register
     // no flags are updated
+    c->t = 8;
     uint8_t opcode = c->read(c->pc);
     uint8_t* reg;
     if (opcode == 0x06)
@@ -366,6 +411,7 @@ int ldh_an(cpu* c)
 {
     // opcode 0xf0
     // Put value at 0xff00 + n in A
+    c->t = 12;
     uint16_t addr = c->read(c->pc + 1) + (uint16_t)0xff00;
     uint8_t val = c->read(addr);
     c->a = val;

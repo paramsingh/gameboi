@@ -21,113 +21,102 @@ int jr(cpu* c)
         condition = (c->carry);
 
     if (condition)
+    {
+        c->t = 12;
         c->pc += (int8_t)(c->read(c->pc + 1));
+    }
+    else
+        c->t = 8;
     return 1;
 }
 
 int call(cpu *c)
 {
     // Push address of next instruction onto stack and then
-    //jump to address ()
+    // jump to address ()
     uint8_t opcode = c->read(c->pc);
-    switch(opcode)
+    int condition;
+    if (opcode == 0xcd)
+        condition = 1;
+    else if (opcode == 0xc4)
+        condition = (c->zero == 0);
+    else if (opcode == 0xcc)
+        condition = c->zero;
+    else if (opcode == 0xd4)
+        condition = (c->carry == 0);
+    else if (opcode == 0xdc)
+        condition = c->carry;
+
+    if (condition)
     {
-        case 0xcd:
-        {
-            //Push address of next instruction onto stack and then
-            //jump to address nn.
-            c->sp --;
-            c->write(c->sp, (c->pc+3)>>8);
-            c->sp --;
-            c->write(c->sp, (c->pc+3));
-            uint16_t var = c->read(c->pc+1) | ((uint16_t)c->read(c->pc+2)<<8);
-            c->pc = var;
-            break;
-        }
-        default:
-        {
-            return 0;
-        }
+        c->t = 24;
+        c->sp--;
+        c->write(c->sp, (c->pc + 3) >> 8);
+        c->sp--;
+        c->write(c->sp, (c->pc + 3));
+        uint16_t next = c->read(c->pc + 2);
+        next = (next << 8) | (c->read(c->pc + 1));
+        c->pc = next;
+        printf("stack lo = %02x, hi = %02x\n", c->read(c->sp), c->read(c->sp + 1));
+        return 2;
     }
-    return 2;
+    else
+    {
+        c->t = 12;
+        return 1;
+    }
 }
 
 int push(cpu* c)
 {
     uint16_t opcode = c->read(c->pc);
-    switch(opcode)
-    {
-        case 0xc5:
-        {
-            c->sp--;
-            c->write(c->sp, c->b);
-            c->sp--;
-            c->write(c->sp, c->c);
-            break;
-        }
-        default:
-        {
-            return 0;
-        }
-    }
+    uint8_t hi, lo;
+    if (opcode == 0xf5)
+        hi = (c->a), lo = c->get_f();
+    else if (opcode == 0xc5)
+        hi = c->b, lo = c->c;
+    else if (opcode == 0xd5)
+        hi = c->d, lo = c->e;
+    else if (opcode == 0xe5)
+        hi = c->h, lo = c->l;
+
+    // takes 16 cycles
+    c->t = 16;
+
+    // push higher bit first and then lower bit
+    // stack grows downwards
+    c->sp--;
+    c->write(c->sp, hi);
+    c->sp--;
+    c->write(c->sp, lo);
+
     return 1;
 }
 
-int rl(cpu* c)
-{
-    uint16_t opcode = c->read(c->pc);
-    switch (opcode)
-    {
-        case 0x11:
-        {
-            // rotate c left through carry flag
-            uint16_t x = (((uint16_t)(c->c))<< 1);
-            if (c->carry == 1)
-                x |= 1;
-            if (x & (1 << 8))
-                c->carry = 1;
-            c->c = x;
-            if (c->c == 0)
-                c->zero = 1;
-            break;
-        }
-        case 0x17:
-        {
-            // rotate a left through carry flag
-            uint16_t x = (((uint16_t)(c->a))<< 1);
-            if (c->carry == 1)
-                x |= 1;
-            if (x & (1 << 8))
-                c->carry = 1;
-            c->a = x;
-            if (c->a == 0)
-                c->zero = 1;
-            break;
-        }
-        default:
-            return 0;
-    }
-    c->subtract = 0;
-    c->half_carry = 0;
-    return 1;
-}
 
 int pop(cpu* c)
 {
     uint8_t opcode = c->read(c->pc);
-    switch (opcode)
+    uint8_t *hi, *lo;
+    uint8_t f;
+    c->t = 12;
+    if (opcode == 0xc1)
+        hi = &(c->b), lo = &(c->c);
+    else if (opcode == 0xd1)
+        hi = &(c->d), lo = &(c->e);
+    else if (opcode == 0xe1)
+        hi = &(c->h), lo = &(c->l);
+    else if (opcode == 0xf1)
     {
-        case 0xc1:
-        {
-            // pop into bc
-            c->c = c->read(c->sp);
-            c->b = c->read(c->sp + 1);
-            c->sp += 2;
-            break;
-        }
-        default:
-            return 0;
+        c->a = c->read(c->sp + 1);
+        c->set_f(c->read(c->sp));
+        c->sp += 2;
+        return 1;
     }
+
+    *lo = c->read(c->sp);
+    *hi = c->read(c->sp + 1);
+    c->sp += 2;
     return 1;
 }
 
@@ -154,8 +143,14 @@ int ret(cpu* c)
         uint16_t hi = c->read(c->sp + 1);
         c->sp += 2;
         c->pc = (hi << 8) | lo;
+        if (opcode == 0xc9)
+            c->t = 16;
+        else
+            c->t = 20;
         return 2;
     }
-    else
+    else {
+        c->t = 8;
         return 1;
+    }
 }

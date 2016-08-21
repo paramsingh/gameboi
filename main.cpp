@@ -9,11 +9,15 @@ int main()
 {
 	cpu c;
 	int count= 0;
+	int flag = 0;
 	while (true)
 	{
 		uint16_t opcode = c.read(c.pc);
 		// if opcode is 0xcb then we have to execute the next byte
 		// from the extended instruction set
+		if (c.h == 0x7f && c.l == 0xff) {
+			flag = 1;
+		}
 		if (opcode == 0xcb)
 		{
 			opcode = c.read(c.pc + 1) + 0xff;
@@ -34,18 +38,22 @@ int main()
 		}
 		else if(executed == 1)
 		{
-			printf("Instruction name: %s\n", inst_set[opcode].name.c_str());
-			c.time += inst_set[opcode].cycles;
+
+			c.time += c.t;
 			c.pc += inst_set[opcode].size;
-            c.status();
+
 
 		}
         else if(executed == 2)
         {
-            c.time += inst_set[opcode].cycles;
+            c.time += c.t;
         }
+        printf("Instruction name: %s\n", inst_set[opcode].name.c_str());
+        c.status();
         //printf("pc = %x\n", c.pc);
-        //getchar();
+        if (flag){
+        	//getchar();
+        }
 
 	}
 	return 0;

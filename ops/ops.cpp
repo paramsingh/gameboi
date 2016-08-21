@@ -15,7 +15,7 @@ operation inst_set[512] = {
 	// 0
 	op,
 	// 1
-	op,
+	operation("LD BC nn", 3, 12, load_pair),
 	// 2
 	operation("LD (BC) A", 1, 8, load_atomem),
 	// 3
@@ -33,7 +33,7 @@ operation inst_set[512] = {
 	// 9
 	op,
 	// 10
-	op,
+	operation("LD A (BC)", 1, 8, load_aindirect),
 	// 11
 	op,
 	// 12
@@ -47,7 +47,7 @@ operation inst_set[512] = {
 	// 16
 	op,
 	// 17
-	operation("LD DE nn", 3, 12,ld),
+	operation("LD DE nn", 3, 12, load_pair),
 	// 18
 	operation("LD (DE) A", 1, 8, load_atomem),
 	// 19
@@ -65,7 +65,7 @@ operation inst_set[512] = {
 	// 25
 	op,
 	// 26
-	operation("LD A (DE)", 1, 8, ld),
+	operation("LD A (DE)", 1, 8, load_aindirect),
 	// 27
 	op,
 	// 28
@@ -79,7 +79,7 @@ operation inst_set[512] = {
 	// 32
 	operation("JR NZ n", 2, 8, jr),
 	// 33
-	operation("LD HL nn", 3, 12, ld),
+	operation("LD HL nn", 3, 12, load_pair),
 	// 34
 	operation("LD (HL+), A", 1, 8, ld),
 	// 35
@@ -111,7 +111,7 @@ operation inst_set[512] = {
 	// 48
 	operation("JR NC n", 2, 8, jr),
 	// 49
-	operation("LD SP nn", 3, 12, ld),
+	operation("LD SP nn", 3, 12, load_sp),
 	// 50
 	operation("LDD HL A", 1, 8, ld),
 	// 51
@@ -251,7 +251,7 @@ operation inst_set[512] = {
 	// 118
 	op,
 	// 119
-	operation("LD (HL) A", 1, 8, ld),
+	operation("LD (HL) A", 1, 8, load_rtomem),
 	// 120
 	operation("LD A, B", 1, 4, load_rtoa),
 	// 121
@@ -349,19 +349,19 @@ operation inst_set[512] = {
 	// 167
 	op,
 	// 168
-	op,
+	operation("XOR B", 1, 4, xorop),
 	// 169
-	op,
+	operation("XOR C", 1, 4, xorop),
 	// 170
-	op,
+	operation("XOR D", 1, 4, xorop),
 	// 171
-	op,
+	operation("XOR E", 1, 4, xorop),
 	// 172
-	op,
+	operation("XOR H", 1, 4, xorop),
 	// 173
-	op,
+	operation("XOR L", 1, 4, xorop),
 	// 174
-	op,
+	operation("XOR (HL)", 1, 8, xorop),
 	// 175
 	operation("XOR A", 1, 4, xorop),
 	// 176
@@ -405,7 +405,7 @@ operation inst_set[512] = {
 	// 195
 	op,
 	// 196
-	op,
+	operation("CALL NZ nn", 3, 12, call),
 	// 197
 	operation("PUSH BC", 1, 16, push),
 	// 198
@@ -421,9 +421,9 @@ operation inst_set[512] = {
 	// 203
 	op,
 	// 204
-	op,
+	operation("CALL Z nn", 3, 12, call),
 	// 205
-	operation("CALL nn",3,12,call),
+	operation("CALL nn", 3, 24,call),
 	// 206
 	op,
 	// 207
@@ -431,15 +431,15 @@ operation inst_set[512] = {
 	// 208
 	operation("RET NC", 1, 8, ret),
 	// 209
-	op,
+	operation("POP DE", 1, 12, pop),
 	// 210
 	op,
 	// 211
 	op,
 	// 212
-	op,
+	operation("CALL NC nn", 3, 12, call),
 	// 213
-	op,
+	operation("PUSH DE", 1, 16, push),
 	// 214
 	op,
 	// 215
@@ -453,7 +453,7 @@ operation inst_set[512] = {
 	// 219
 	op,
 	// 220
-	op,
+	operation("CALL C nn", 3, 12, call),
 	// 221
 	op,
 	// 222
@@ -463,7 +463,7 @@ operation inst_set[512] = {
 	// 224
 	operation("LD ($FF00 +n),A", 2,12,ld),
 	// 225
-	op,
+	operation("POP HL", 1, 12, pop),
 	// 226
 	operation("LD ($FF00+C),A",1, 8, ld),
 	// 227
@@ -471,7 +471,7 @@ operation inst_set[512] = {
 	// 228
 	op,
 	// 229
-	op,
+	operation("PUSH HL", 1, 16, push),
 	// 230
 	op,
 	// 231
@@ -489,13 +489,13 @@ operation inst_set[512] = {
 	// 237
 	op,
 	// 238
-	op,
+	operation("XOR A n", 2, 8, xorop),
 	// 239
 	op,
 	// 240
-	operation("LDH A, (n)", 2, 12, ldh_an),
+	operation("LD A, (0xff00 + n)", 2, 12, ldh_an),
 	// 241
-	op,
+	operation("POP AF", 1, 12, pop),
 	// 242
 	op,
 	// 243
@@ -503,7 +503,7 @@ operation inst_set[512] = {
 	// 244
 	op,
 	// 245
-	op,
+	operation("PUSH AF", 1, 16, push),
 	// 246
 	op,
 	// 247
@@ -511,9 +511,9 @@ operation inst_set[512] = {
 	// 248
 	op,
 	// 249
-	op,
+	operation("LD SP HL", 1, 8, load_sp),
 	// 250
-	op,
+	operation("LD A (nn)", 3, 16, load_aindirect),
 	// 251
 	op,
 	// 252
@@ -555,21 +555,21 @@ operation inst_set[512] = {
 	// 270
 	op,
 	// 271
-	op,
+	operation("RL B", 1, 8, rl),
 	// 272
 	operation("RL C", 1, 8, rl),
 	// 273
-	op,
+	operation("RL D", 1, 8, rl),
 	// 274
-	op,
+	operation("RL E", 1, 8, rl),
 	// 275
-	op,
+	operation("RL H", 1, 8, rl),
 	// 276
-	op,
+	operation("RL L", 1, 8, rl),
 	// 277
-	op,
+	operation("RL (HL)", 1, 16, rl),
 	// 278
-	op,
+	operation("RL A", 1, 8, rl),
 	// 279
 	op,
 	// 280
@@ -763,19 +763,19 @@ operation inst_set[512] = {
 	// 374
 	op,
 	// 375
-	op,
+	operation("BIT 7, B", 1, 8, bit7),
 	// 376
-	op,
+	operation("BIT 7, C", 1, 8, bit7),
 	// 377
-	op,
+	operation("BIT 7, D", 1, 8, bit7),
 	// 378
-	op,
+	operation("BIT 7, E", 1, 8, bit7),
 	// 379
-	operation("BIT 7, h", 1, 8, bit),
+	operation("BIT 7, h", 1, 8, bit7),
 	// 380
-	op,
+	operation("BIT 7, L", 1, 8, bit7),
 	// 381
-	op,
+	operation("BIT 7, (HL)", 1, 16, bit7),
 	// 382
 	op,
 	// 383
