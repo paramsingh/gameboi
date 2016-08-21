@@ -1,14 +1,11 @@
 // This file contains the code for emulating the GPU
 // of the Gameboy
 
-
 // We will eventually use gtkmm to create a
 // canvas of 160 * 144 on which we'll
 // draw
 
-
 // Right now have to make do with a 2d array of numbers
-
 
 // this address contains the line being scanned currently
 const uint16_t linereg = 0xff44;
@@ -59,18 +56,60 @@ void gpu::change_scanline()
     }
 }
 
-void gpu::update()
+void gpu::step()
 {
     // add the number of cycles passed to the clock
     clock += c->t;
-
     if (mode == 0) // horizontal blank mode
     {
         if (clock >= 204) // horizontal blank mode over
         {
             clock = 0;
-            line++;
+            change_scanline();
+            if (line == 143)
+            {
+                change_mode(1);
+                // TODO: draw the screen
+            }
+            else
+            {
+                change_mode(2);
+            }
         }
-
+    }
+    // vertical blank mode
+    // goes on for 4560 cycles
+    // i.e 456 cycles each for 10 scanlines from 144 to 153
+    else if (mode == 1)
+    {
+        if (clock >= 456)
+        {
+            clock = 0;
+            change_scanline();
+            if (line == 0)
+                change_mode(2);
+        }
+    }
+    // scanline accessing sprites etc
+    // goes on for 80 cycles
+    else if (mode == 2)
+    {
+        if (clock >= 80)
+        {
+            clock = 0;
+            change_mode(3);
+        }
+    }
+    // scanline accessing vram
+    // after this is done the entire line can be written to the
+    // pixels array for drawing later
+    else if (mode == 3)
+    {
+        if (clock >= 172)
+        {
+            clock = 0;
+            change_mode(0);
+            // TODO: write a scanline to the framebuffer;
+        }
     }
 }
