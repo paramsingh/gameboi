@@ -26,6 +26,7 @@ int cmp(cpu* c)
     else if (opcode == 0xfe)
     {
         n = c->read(c->pc + 1);
+        ///printf("val = %02x\n", n);
         c->t = 8;
     }
     if (c->a == n)
@@ -33,7 +34,7 @@ int cmp(cpu* c)
     else
         c->zero = 0;
     c->subtract = 1;
-    if (((c -> a) & 0xf) < (n & 0xf))
+    if (((c->a - n) & 0xf) > ((c->a) & 0xf))
         c->half_carry = 1;
     else
         c->half_carry = 0;
@@ -258,19 +259,10 @@ int rl(cpu* c)
         reg = c->memory + addr;
     }
 
-    // save the shifted value in a 16 bit integer
-    uint16_t x = (((uint16_t)(*reg))<< 1);
-    // if the carry flag was 1, set the 0th bit
-    // in the shifted value
-    if (c->carry == 1)
-        x |= 1;
-    // set carry according to 8th bit in shifted value
-    c->carry = (x >> 8) & 1;
-    // set register to shifted value
-    *reg = x;
-    // set the flags affected
-    c->zero = (*reg == 0);
-    c->subtract = 0;
-    c->half_carry = 0;
+    int temp = c->carry;
+    c->carry = ((*reg) >> 7) & 1;
+    *reg = (*reg) << 1 | temp;
+    c->zero = *reg == 0;
+
     return 1;
 }

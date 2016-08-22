@@ -57,7 +57,7 @@ int call(cpu *c)
         uint16_t next = c->read(c->pc + 2);
         next = (next << 8) | (c->read(c->pc + 1));
         c->pc = next;
-        printf("stack lo = %02x, hi = %02x\n", c->read(c->sp), c->read(c->sp + 1));
+        //printf("stack lo = %02x, hi = %02x\n", c->read(c->sp), c->read(c->sp + 1));
         return 2;
     }
     else

@@ -4,10 +4,13 @@ using namespace std;
 #include "cpu.cpp"
 #include "ops/ops.hpp"
 #include "ops/ops.cpp"
+#include "gpu.hpp"
+#include "gpu.cpp"
 
 int main()
 {
 	cpu c;
+	gpu g(&c);
 	int count= 0;
 	int flag = 0;
 	while (true)
@@ -38,20 +41,27 @@ int main()
 		}
 		else if(executed == 1)
 		{
-			c.time += c.t;
 			c.pc += inst_set[opcode].size;
 		}
-        else if(executed == 2)
-        {
-            c.time += c.t;
-        }
-        printf("Instruction name: %s\n", inst_set[opcode].name.c_str());
-        c.status();
+        //printf("opcode = %02x, Instruction name: %s\n", opcode,inst_set[opcode].name.c_str());
+        //c.status();
         //printf("pc = %x\n", c.pc);
-        if (flag){
-        	//getchar();
+        c.time += c.t;
+        g.step();
+        if (false) {
+        	printf("tile data #0\n");
+        	for (int i = 0x8000; i <= 0x87ff; i++)
+        		printf("%x\n", c.memory[i]);
+        	printf("tile data #1\n");
+        	for (int i = 0x8800; i <= 0x8fff; i++)
+        		printf("%x\n", c.memory[i]);
+        	break;
         }
-
+        if (c.pc == 0x006a){
+        	//flag = 1;
+        	break;
+        }
 	}
+	g.print_pixels();
 	return 0;
 }

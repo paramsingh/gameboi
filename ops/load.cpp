@@ -77,7 +77,7 @@ int ld(cpu* c)
             uint16_t addr = (((uint16_t)c->h) << 8) | (c -> l);
             c->write(addr, c->a);
             addr--;
-            c->l = addr;
+            c->l = addr & 0xff;
             c->h = addr >> 8;
             break;
         }

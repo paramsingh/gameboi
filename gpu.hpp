@@ -28,4 +28,16 @@ struct gpu
 
     // update the gpu timings and mode etc.
     void step();
+
+    // there are two tilemaps in memory
+    int which_map;
+
+    // returns if the lcd is on or not
+    // this is done by accessing the lcd control register in the
+    // cpu
+    bool on();
+
+    void render_tiles();
+
+    void print_pixels();
 };
