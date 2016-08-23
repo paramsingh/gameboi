@@ -266,3 +266,43 @@ int rl(cpu* c)
 
     return 1;
 }
+
+int sub(cpu* c)
+{
+    uint8_t opcode = c->read(c->pc);
+    uint8_t data;
+    c->t = 4;
+    if (opcode == 0x97)
+        data = c->a;
+    else if (opcode == 0x90)
+        data = c->b;
+    else if (opcode == 0x91)
+        data = c->c;
+    else if (opcode == 0x92)
+        data = c->d;
+    else if (opcode == 0x93)
+        data = c->e;
+    else if (opcode == 0x94)
+        data = c->h;
+    else if (opcode == 0x95)
+        data = c->l;
+    else if (opcode == 0x96)
+    {
+        uint16_t addr = c->h;
+        addr = (addr << 8) | c->l;
+        data = c->read(addr);
+        c->t = 8;
+    }
+    else if (opcode == 0xd6)
+    {
+        data = c->read(c->pc + 1);
+        c->t = 8;
+    }
+
+    c->zero = (c->a == data);
+    c->subtract = 1;
+    c->carry = (c->a < data);
+    c->half_carry = (c->a & 0xf) < (data & 0xf);
+    c->a = c->a - data;
+    return 1;
+}

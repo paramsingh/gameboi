@@ -40,4 +40,5 @@ struct gpu
     void render_tiles();
 
     void print_pixels();
+    int cnt;
 };

@@ -64,7 +64,7 @@ void cpu::write(uint16_t addr, uint8_t val)
 		memory[addr] = 0;
 	else if (addr >= 0x8000 && addr <= 0x9fff)
 	{
-		printf("write val %02x to address %04x\n", val, addr);
+		//printf("write val %02x to address %04x\n", val, addr);
 		memory[addr] = val;
 	}
 	else

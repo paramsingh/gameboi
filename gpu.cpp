@@ -38,6 +38,7 @@ gpu::gpu(cpu* m)
     change_mode(1);
     line = 0;
     c->memory[linereg] = 0;
+    cnt = 0;
 }
 
 void gpu::change_mode(int id)
@@ -82,7 +83,7 @@ void gpu::step()
         return;
     // add the number of cycles passed to the clock
     clock += c->t;
-    printf("from gpu, mode = %d, clock = %d\n", mode, clock);
+    //("from gpu, mode = %d, clock = %d\n", mode, clock);
     if (mode == 0) // horizontal blank mode
     {
         if (clock >= 204) // horizontal blank mode over
@@ -95,6 +96,7 @@ void gpu::step()
                 // TODO: draw the screen
                 // TODO: Request an interrupt also here
                 printf("new frame\n");
+                cnt++;
                 print_pixels();
             }
             else
@@ -145,7 +147,7 @@ void gpu::step()
             // TODO: write a scanline to the framebuffer;
             // right now we can render tiles only
             render_tiles();
-            printf("line %d done\n",line);
+            //printf("line %d done\n",line);
         }
     }
 }
@@ -155,6 +157,7 @@ void gpu::render_tiles()
 {
     if (line >= 144)
         return;
+    int flag = 0;
 
     // from where to get the tiles
     // this value will either be 0x8000 or 0x8800
@@ -165,20 +168,20 @@ void gpu::render_tiles()
     bool is_signed;
 
     uint8_t scrollx = c->read(0xff43), scrolly = c->read(0xff42);
-    printf("scrollx = %d, scrolly = %d\n", scrollx, scrolly);
+    //printf("scrollx = %d, scrolly = %d\n", scrollx, scrolly);
     // get the value in control register
     uint8_t control = c->read(lcd_control);
     // test bit 4 of the control register
     if ((control >> 4) & 1)
     {
         where = 0x8000;
-        printf("where = 8000\n");
+        //printf("where = 8000\n");
         is_signed = false;
     }
     else
     {
         where = 0x8800;
-        printf("where = 8800\n");
+        //printf("where = 8800\n");
         is_signed = true;
     }
 
@@ -191,26 +194,34 @@ void gpu::render_tiles()
     if ((control >> 3) & 1)
         tilemap = 0x9c00;
     else {
-        printf("tilemap = 9800\n");
+        //printf("tilemap = 9800\n");
         tilemap = 0x9800;
     }
 
     // find which y out of the 256 x 256 background we're drawing
     uint8_t y = scrolly + line;
-    printf("y = %d\n", y);
+    //printf("y = %d\n", y);
     // which row in the 32 x 32 matrix of mapping will contain
     // the y line
     uint16_t tile_row = ((uint8_t)(y / 8));
 
     for (int i = 0; i < 160; i++)
     {
+        flag = 0;
         uint8_t x = i + scrollx;
-        printf("x = %u, y = %u\n", x, y);
+        //printf("x = %u, y = %u\n", x, y);
         // which column will contain the x line
         uint16_t tile_column = x / 8;
 
         uint16_t addr = tilemap + tile_row * 32 + tile_column;
-
+        if (addr >= 0x9904 && addr <= 0x9910)
+        {
+            //printf("yo, addr = %04x\n", addr);
+        }
+        else if (addr >= 0x9924 && addr <= 0x992f)
+        {
+            //printf("yo, addr = %04x\n", addr);
+        }
         int16_t tilenum;
         if (is_signed)
         {
@@ -220,11 +231,11 @@ void gpu::render_tiles()
         {
             tilenum = c->read(addr);
         }
-        printf("tile_row = %d, column = %d, addr = %04x, tilenum = %d\n", tile_row, tile_column, addr, tilenum);
+        //printf("tile_row = %d, column = %d, addr = %04x, tilenum = %d\n", tile_row, tile_column, addr, tilenum);
 
         uint16_t tile_address;
         // size of one tile = 16 bytes
-        if (is_signed)
+        if (!is_signed)
         {
             tile_address = where + (tilenum * 16);
         }
@@ -232,12 +243,14 @@ void gpu::render_tiles()
         {
             tile_address = where + ((tilenum + 128) * 16);
         }
+        if (flag == 1)
+            printf("tilenum = %2x, tile_address = %04x\n", tilenum, tile_address);
 
         // need lno'th column of tilenum
         uint8_t lno = y % 8;
         uint8_t byte1 = c->read(tile_address + lno * 2);
         uint8_t byte2 = c->read(tile_address + lno * 2 + 1);
-        assert(byte1 == 0 && byte2 == 0);
+        //assert(byte1 == 0 && byte2 == 0);
 
         // now byte1 and byte2 contains data for the yth line
         // bit 7 contains val for x = 0
@@ -253,8 +266,17 @@ void gpu::print_pixels()
 {
     for (int i = 0; i < 144; i++)
     {
-        for (int j = 0; j < 160; j++)
-            printf("%d", pixels[j][i]);
+        for (int j = 0; j < 160; j++) {
+            int v = pixels[j][i];
+            if (v == 0)
+                printf(" ");
+            else if (v == 1)
+                printf("*");
+            else if (v == 2)
+                printf(".");
+            else
+                printf("#");
+        }
         printf("\n");
     }
 }

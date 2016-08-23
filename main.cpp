@@ -48,9 +48,11 @@ int main()
         //printf("pc = %x\n", c.pc);
         c.time += c.t;
         g.step();
+        if (g.cnt == 100)
+        	break;
         if (c.pc == 0x0055)
         {
-        	printf("tiles\n");
+        	/*printf("tiles\n");
         	int i = 0x8000;
         	while (i < 0x8800)
         	{
@@ -69,8 +71,10 @@ int main()
         			i += 2;
         		}
         		printf("\n");
-        	}
+        	}*/
         }
+        if (c.pc == 0x00e0)
+        	break;
 	}
 	return 0;
 }

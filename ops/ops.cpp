@@ -301,21 +301,21 @@ operation inst_set[512] = {
 	// 143
 	op,
 	// 144
-	op,
+	operation("SUB B", 1, 4, sub),
 	// 145
-	op,
+	operation("SUB C", 1, 4, sub),
 	// 146
-	op,
+	operation("SUB D", 1, 4, sub),
 	// 147
-	op,
+	operation("SUB E", 1, 4, sub),
 	// 148
-	op,
+	operation("SUB H", 1, 4, sub),
 	// 149
-	op,
+	operation("SUB L", 1, 4, sub),
 	// 150
-	op,
+	operation("SUB (HL)", 1, 8, sub),
 	// 151
-	op,
+	operation("SUB A", 1, 4, sub),
 	// 152
 	op,
 	// 153
@@ -441,7 +441,7 @@ operation inst_set[512] = {
 	// 213
 	operation("PUSH DE", 1, 16, push),
 	// 214
-	op,
+	operation("SUB n", 2, 8, sub),
 	// 215
 	op,
 	// 216
