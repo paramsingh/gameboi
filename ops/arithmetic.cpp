@@ -26,7 +26,6 @@ int cmp(cpu* c)
     else if (opcode == 0xfe)
     {
         n = c->read(c->pc + 1);
-        ///printf("val = %02x\n", n);
         c->t = 8;
     }
     if (c->a == n)

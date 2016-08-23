@@ -84,7 +84,6 @@ void gpu::step()
         return;
     // add the number of cycles passed to the clock
     clock += c->t;
-    //("from gpu, mode = %d, clock = %d\n", mode, clock);
     if (mode == 0) // horizontal blank mode
     {
         if (clock >= 204) // horizontal blank mode over
@@ -94,11 +93,9 @@ void gpu::step()
             if (line == 143)
             {
                 change_mode(1);
-                // TODO: draw the screen
                 // TODO: Request an interrupt also here
                 cnt++;
-                //screen->clear();
-                print_pixels();
+                draw_pixels();
             }
             else
             {
@@ -145,10 +142,7 @@ void gpu::step()
         {
             clock = 0;
             change_mode(0);
-            // TODO: write a scanline to the framebuffer;
-            // right now we can render tiles only
             render_tiles();
-            //printf("line %d done\n",line);
         }
     }
 }
@@ -169,20 +163,17 @@ void gpu::render_tiles()
     bool is_signed;
 
     uint8_t scrollx = c->read(0xff43), scrolly = c->read(0xff42);
-    //printf("scrollx = %d, scrolly = %d\n", scrollx, scrolly);
     // get the value in control register
     uint8_t control = c->read(lcd_control);
     // test bit 4 of the control register
     if ((control >> 4) & 1)
     {
         where = 0x8000;
-        //printf("where = 8000\n");
         is_signed = false;
     }
     else
     {
         where = 0x8800;
-        //printf("where = 8800\n");
         is_signed = true;
     }
 
@@ -194,14 +185,11 @@ void gpu::render_tiles()
 
     if ((control >> 3) & 1)
         tilemap = 0x9c00;
-    else {
-        //printf("tilemap = 9800\n");
+    else
         tilemap = 0x9800;
-    }
 
     // find which y out of the 256 x 256 background we're drawing
     uint8_t y = scrolly + line;
-    //printf("y = %d\n", y);
     // which row in the 32 x 32 matrix of mapping will contain
     // the y line
     uint16_t tile_row = ((uint8_t)(y / 8));
@@ -210,19 +198,11 @@ void gpu::render_tiles()
     {
         flag = 0;
         uint8_t x = i + scrollx;
-        //printf("x = %u, y = %u\n", x, y);
+
         // which column will contain the x line
         uint16_t tile_column = x / 8;
 
         uint16_t addr = tilemap + tile_row * 32 + tile_column;
-        if (addr >= 0x9904 && addr <= 0x9910)
-        {
-            //printf("yo, addr = %04x\n", addr);
-        }
-        else if (addr >= 0x9924 && addr <= 0x992f)
-        {
-            //printf("yo, addr = %04x\n", addr);
-        }
         int16_t tilenum;
         if (is_signed)
         {
@@ -232,7 +212,6 @@ void gpu::render_tiles()
         {
             tilenum = c->read(addr);
         }
-        //printf("tile_row = %d, column = %d, addr = %04x, tilenum = %d\n", tile_row, tile_column, addr, tilenum);
 
         uint16_t tile_address;
         // size of one tile = 16 bytes
@@ -244,14 +223,11 @@ void gpu::render_tiles()
         {
             tile_address = where + ((tilenum + 128) * 16);
         }
-        if (flag == 1)
-            printf("tilenum = %2x, tile_address = %04x\n", tilenum, tile_address);
 
         // need lno'th column of tilenum
         uint8_t lno = y % 8;
         uint8_t byte1 = c->read(tile_address + lno * 2);
         uint8_t byte2 = c->read(tile_address + lno * 2 + 1);
-        //assert(byte1 == 0 && byte2 == 0);
 
         // now byte1 and byte2 contains data for the yth line
         // bit 7 contains val for x = 0
@@ -269,12 +245,13 @@ int gpu::getcolor(int id)
     return 0;
 }
 
-void gpu::print_pixels()
+void gpu::draw_pixels()
 {
     for (int i = 0; i < 144; i++)
     {
         for (int j = 0; j < 160; j++) {
             int color = pixels[j][i];
+            // TODO: get accurate color and draw correctly
             if (color == 0)
             {
                 SDL_SetRenderDrawColor(screen->renderer, 0xff, 0xff, 0xff, 0xFF);
@@ -289,5 +266,4 @@ void gpu::print_pixels()
         }
     }
     SDL_RenderPresent(screen->renderer);
-    //SDL_Delay(2);
 }

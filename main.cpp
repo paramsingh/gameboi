@@ -10,6 +10,7 @@ using namespace std;
 #include "gpu/gpu.hpp"
 #include "gpu/gpu.cpp"
 
+// TODO: Get this stuff into a gameboy class maybe
 cpu c;
 gui screen;
 gpu g(&c, &screen);
@@ -26,7 +27,6 @@ void step() {
     int executed = inst_set[opcode].func(&c);
     // TODO:
     // timer update
-    // pc update
     // interrupt checking
     if (executed == 0)
     {
@@ -40,9 +40,8 @@ void step() {
     {
         c.pc += inst_set[opcode].size;
     }
-    //printf("opcode = %02x, Instruction name: %s\n", opcode,inst_set[opcode].name.c_str());
-    //c.status();
-    //printf("pc = %x\n", c.pc);
+    // printf("opcode = %02x, Instruction name: %s\n", opcode,inst_set[opcode].name.c_str());
+    // c.status();
     c.time += c.t;
     g.step();
 }
@@ -50,25 +49,21 @@ void step() {
 int main()
 {
     screen.init();
-	int count= 0;
-	int flag = 1;
+    int count= 0;
+    int flag = 1;
     int quit = 0;
     SDL_Event e;
     while (!quit)
-	{
-        while( SDL_PollEvent( &e ) != 0 )
+    {
+        while(SDL_PollEvent(&e) != 0)
         {
             //User requests quit
-            if( e.type == SDL_QUIT )
+            if(e.type == SDL_QUIT)
             {
                 quit = 1;
             }
         }
-        if (flag)
-            step();
-        if (g.cnt == 300) {
-            flag = 0;
-        }
-	}
-	return 0;
+        step();
+    }
+    return 0;
 }

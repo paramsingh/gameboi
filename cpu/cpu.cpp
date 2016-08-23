@@ -1,13 +1,10 @@
 cpu::cpu()
 {
 	memset(memory, 0, sizeof(memory));
-	printf("hello\n");
-	FILE* f = fopen("hello.txt", "r");
 	FILE *fp = fopen("DMG_ROM.bin", "rb");
 	// Read bootstrap program from binary
 	fread(bootloader, sizeof(uint8_t), 256, fp);
 	fclose(fp);
-	printf("hi\n");
 	// Tetris has no banking so we can read it all the way
 	FILE *rom = fopen("Tetris (World).gb", "rb");
 	fread(memory, sizeof(uint8_t), 32768, rom);
@@ -65,11 +62,6 @@ void cpu::write(uint16_t addr, uint8_t val)
 		return;
 	else if (addr == 0xff44) // tries to write to the scanline register
 		memory[addr] = 0;
-	else if (addr >= 0x8000 && addr <= 0x9fff)
-	{
-		//printf("write val %02x to address %04x\n", val, addr);
-		memory[addr] = val;
-	}
 	else
 		memory[addr] = val;
 }

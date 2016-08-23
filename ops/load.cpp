@@ -338,7 +338,6 @@ int load_rtomem(cpu* c)
         from = (c->l);
     else if (opcode == 0x36)
     {
-        printf("called\n");
         c->t = 12;
         from = c->read(c->pc + 1);
     }

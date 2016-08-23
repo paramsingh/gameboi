@@ -43,7 +43,7 @@ struct gpu
     void render_tiles();
 
 
-    void print_pixels();
+    void draw_pixels();
 
     int getcolor(int);
     int cnt;

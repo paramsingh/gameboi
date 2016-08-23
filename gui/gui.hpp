@@ -13,6 +13,4 @@ struct gui
 
     gui();
     void init();
-    void clear();
-    void reset_texture();
 };
