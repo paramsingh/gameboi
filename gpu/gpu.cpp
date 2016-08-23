@@ -30,8 +30,9 @@ const uint16_t statreg = 0xff41;
 // Bit 0 - BG Display (for CGB see below) (0=Off, 1=On)
 const uint16_t lcd_control = 0xff40;
 
-gpu::gpu(cpu* m)
+gpu::gpu(cpu* m, gui* s)
 {
+    screen = s;
     c = m;
     memset(pixels, 0, sizeof(pixels));
     clock = 0;
@@ -95,8 +96,8 @@ void gpu::step()
                 change_mode(1);
                 // TODO: draw the screen
                 // TODO: Request an interrupt also here
-                printf("new frame\n");
                 cnt++;
+                //screen->clear();
                 print_pixels();
             }
             else
@@ -262,21 +263,31 @@ void gpu::render_tiles()
     }
 }
 
+int gpu::getcolor(int id)
+{
+    // always black so far
+    return 0;
+}
+
 void gpu::print_pixels()
 {
     for (int i = 0; i < 144; i++)
     {
         for (int j = 0; j < 160; j++) {
-            int v = pixels[j][i];
-            if (v == 0)
-                printf(" ");
-            else if (v == 1)
-                printf("*");
-            else if (v == 2)
-                printf(".");
-            else
-                printf("#");
+            int color = pixels[j][i];
+            if (color == 0)
+            {
+                SDL_SetRenderDrawColor(screen->renderer, 0xff, 0xff, 0xff, 0xFF);
+                SDL_RenderDrawPoint(screen->renderer, j, i);
+
+            }
+            if (color == 2)
+            {
+                SDL_SetRenderDrawColor(screen->renderer, 0x00, 0x00, 0x00, 0xFF);
+                SDL_RenderDrawPoint(screen->renderer, j, i);
+            }
         }
-        printf("\n");
     }
+    SDL_RenderPresent(screen->renderer);
+    //SDL_Delay(2);
 }

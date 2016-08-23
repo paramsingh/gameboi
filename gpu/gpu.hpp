@@ -17,9 +17,12 @@ struct gpu
     // pointer to the cpu with which the gpu will work
     cpu* c;
 
+    // pointer to SDL gui
+    gui* screen;
+
     // constructor that will set everything else to zero
-    // and set cpu to the one passed
-    gpu(cpu*);
+    // and set cpu and the screen to the one passed
+    gpu(cpu*, gui*);
 
     // change mode
     void change_mode(int);
@@ -39,6 +42,9 @@ struct gpu
 
     void render_tiles();
 
+
     void print_pixels();
+
+    int getcolor(int);
     int cnt;
 };
