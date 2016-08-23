@@ -13,7 +13,7 @@ operation op("Dummy", 0, 0, not_imp);
 
 operation inst_set[512] = {
 	// 0
-	op,
+	operation("NOP", 1, 4, nop),
 	// 1
 	operation("LD BC nn", 3, 12, load_pair),
 	// 2
@@ -401,9 +401,9 @@ operation inst_set[512] = {
 	// 193
 	operation("POP BC", 1, 12, pop),
 	// 194
-	op,
+	operation("JP NZ nn", 3, 12, jp),
 	// 195
-	op,
+	operation("JP nn", 3, 12, jp),
 	// 196
 	operation("CALL NZ nn", 3, 12, call),
 	// 197
@@ -417,7 +417,7 @@ operation inst_set[512] = {
 	// 201
 	operation("RET", 1, 8, ret),
 	// 202
-	op,
+	operation("JP Z nn", 3, 12, jp),
 	// 203
 	op,
 	// 204
@@ -433,7 +433,7 @@ operation inst_set[512] = {
 	// 209
 	operation("POP DE", 1, 12, pop),
 	// 210
-	op,
+	operation("JP NC nn", 3, 12, jp),
 	// 211
 	op,
 	// 212
@@ -449,7 +449,7 @@ operation inst_set[512] = {
 	// 217
 	op,
 	// 218
-	op,
+	operation("JP C nn", 3, 12, jp),
 	// 219
 	op,
 	// 220

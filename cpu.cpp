@@ -1,5 +1,6 @@
 cpu::cpu()
 {
+	memset(memory, 0, sizeof(memory));
 	FILE *fp = fopen("DMG_ROM.bin", "rb");
 	// Read bootstrap program from binary
 	fread(bootloader, sizeof(uint8_t), 256, fp);
@@ -8,23 +9,24 @@ cpu::cpu()
 	FILE *rom = fopen("Tetris (World).gb", "rb");
 	fread(memory, sizeof(uint8_t), 32768, rom);
 	fclose(rom);
-	pc = 0;
+	pc = 0x0000;
 	time = 0;
 	zero = carry = half_carry = subtract = 0;
 	booting = 1;
+	sp = 0xfffe;
 }
 
 void cpu::status()
 {
-	printf("a = %x\n", a);
-	printf("b = %x\n", b);
-	printf("c = %x\n", c);
-	printf("d = %x\n", d);
-	printf("e = %x\n", e);
-	printf("h = %x\n", h);
-	printf("l = %x\n", l);
-	printf("sp = %x\n", sp);
-	printf("pc = %x\n", pc);
+	printf("a = %02x\n", a);
+	printf("b = %02x\n", b);
+	printf("c = %02x\n", c);
+	printf("d = %02x\n", d);
+	printf("e = %02x\n", e);
+	printf("h = %02x\n", h);
+	printf("l = %02x\n", l);
+	printf("sp = %04x\n", sp);
+	printf("pc = %04x\n", pc);
 	printf("carry = %u\n", carry);
 	printf("half_carry = %u\n", half_carry);
 	printf("subtract = %u\n", subtract);

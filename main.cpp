@@ -48,20 +48,29 @@ int main()
         //printf("pc = %x\n", c.pc);
         c.time += c.t;
         g.step();
-        if (false) {
-        	printf("tile data #0\n");
-        	for (int i = 0x8000; i <= 0x87ff; i++)
-        		printf("%x\n", c.memory[i]);
-        	printf("tile data #1\n");
-        	for (int i = 0x8800; i <= 0x8fff; i++)
-        		printf("%x\n", c.memory[i]);
-        	break;
-        }
-        if (c.pc == 0x006a){
-        	//flag = 1;
-        	break;
+        if (c.pc == 0x0055)
+        {
+        	printf("tiles\n");
+        	int i = 0x8000;
+        	while (i < 0x8800)
+        	{
+        		for (int x = 0; x < 8; x++) {
+        			printf("%02x%02x ", c.memory[i], c.memory[i + 1]);
+        			i += 2;
+        		}
+        		printf("\n");
+        	}
+        	printf("tilemap\n");
+        	i = 0x9800;
+        	while (i < 0x9c00)
+        	{
+        		for (int x = 0; x < 8; x++) {
+        			printf("%02x%02x ", c.memory[i], c.memory[i + 1]);
+        			i += 2;
+        		}
+        		printf("\n");
+        	}
         }
 	}
-	g.print_pixels();
 	return 0;
 }

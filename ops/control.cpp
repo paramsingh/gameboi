@@ -1,3 +1,9 @@
+int nop(cpu* c)
+{
+    c->t = 4;
+    return 1;
+}
+
 int jr(cpu* c)
 {
     // add value n to the pc according to some condition
@@ -28,6 +34,40 @@ int jr(cpu* c)
     else
         c->t = 8;
     return 1;
+}
+
+int jp(cpu* c)
+{
+    // add value n to the pc according to some condition
+    uint8_t opcode = c->read(c->pc);
+
+    int condition;
+    if (opcode == 0xc3)
+        // jump unconditionally
+        condition = 1;
+    else if (opcode == 0xc2)
+        // jump if zero is reset
+        condition = !(c->zero);
+    else if (opcode == 0xca)
+        // jump if zero is set
+        condition = (c->zero);
+    else if (opcode == 0xd2)
+        // jump if carry is reset
+        condition = !(c->carry);
+    else if (opcode == 0xda)
+        // jump if carry is set
+        condition = (c->carry);
+
+    if (condition)
+    {
+        c->t = 16;
+        uint16_t lo = c->read(c->pc + 1);
+        uint16_t hi = c->read(c->pc + 2);
+        c->pc = (hi << 8) | lo;
+    }
+    else
+        c->t = 12;
+    return 2;
 }
 
 int call(cpu *c)

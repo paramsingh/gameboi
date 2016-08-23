@@ -94,6 +94,8 @@ void gpu::step()
                 change_mode(1);
                 // TODO: draw the screen
                 // TODO: Request an interrupt also here
+                printf("new frame\n");
+                print_pixels();
             }
             else
             {
@@ -198,15 +200,16 @@ void gpu::render_tiles()
     printf("y = %d\n", y);
     // which row in the 32 x 32 matrix of mapping will contain
     // the y line
-    uint16_t tile_row = ((uint8_t)(y / 8)) * 32;
+    uint16_t tile_row = ((uint8_t)(y / 8));
 
     for (int i = 0; i < 160; i++)
     {
         uint8_t x = i + scrollx;
+        printf("x = %u, y = %u\n", x, y);
         // which column will contain the x line
         uint16_t tile_column = x / 8;
 
-        uint16_t addr = tilemap + tile_row + tile_column;
+        uint16_t addr = tilemap + tile_row * 32 + tile_column;
 
         int16_t tilenum;
         if (is_signed)

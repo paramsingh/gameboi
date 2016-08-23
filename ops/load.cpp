@@ -323,29 +323,29 @@ int load_rtomem(cpu* c)
 {
     c->t = 8;
     uint8_t opcode = c->read(c->pc);
-    uint8_t *from;
+    uint8_t from;
     if (opcode == 0x70)
-        from = &(c->b);
+        from = (c->b);
     else if (opcode == 0x71)
-        from = &(c->c);
+        from = (c->c);
     else if (opcode == 0x72)
-        from = &(c->d);
+        from = (c->d);
     else if (opcode == 0x73)
-        from = &(c->e);
+        from = (c->e);
     else if (opcode == 0x74)
-        from = &(c->h);
+        from = (c->h);
     else if (opcode == 0x75)
-        from = &(c->l);
-    else if (opcode == 0x76)
+        from = (c->l);
+    else if (opcode == 0x36)
     {
+        printf("called\n");
         c->t = 12;
-        uint16_t addr = ((uint16_t)(c->h) << 8) | (c->l);
-        from = c->memory + addr;
+        from = c->read(c->pc + 1);
     }
     else if (opcode == 0x77)
-        from = &(c -> a);
+        from = (c -> a);
     uint16_t addr = (((uint16_t)(c->h)) << 8) |(c -> l);
-    c->write(addr, *from);
+    c->write(addr, from);
     return 1;
 }
 
@@ -370,7 +370,7 @@ int load_atomem(cpu* c)
     else if (opcode == 0xea)
     {
         c->t = 16;
-        lo = c->read(c->pc + 1), lo = c->read(c->pc + 2);
+        lo = c->read(c->pc + 1), hi = c->read(c->pc + 2);
     }
 
     // get the address from the high and low bytes.
