@@ -5,6 +5,8 @@
 *.obj
 *.gb
 *.bin
+*.txt
+gameboi
 
 # Precompiled Headers
 *.gch
