@@ -269,19 +269,19 @@ operation inst_set[512] = {
 	// 127
 	operation("LD A, A", 1, 4, load_rtoa),
 	// 128
-	op,
+	operation("ADD B", 1, 4, add),
 	// 129
-	op,
+	operation("ADD C", 1, 4, add),
 	// 130
-	op,
+	operation("ADD D", 1, 4, add),
 	// 131
-	op,
+	operation("ADD E", 1, 4, add),
 	// 132
-	op,
+	operation("ADD H", 1, 4, add),
 	// 133
-	op,
+	operation("ADD L", 1, 4, add),
 	// 134
-	op,
+	operation("ADD (HL)", 1, 8, add),
 	// 135
 	op,
 	// 136
@@ -409,7 +409,7 @@ operation inst_set[512] = {
 	// 197
 	operation("PUSH BC", 1, 16, push),
 	// 198
-	op,
+	operation("ADD n", 1, 8, add),
 	// 199
 	op,
 	// 200

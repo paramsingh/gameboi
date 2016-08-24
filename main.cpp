@@ -16,11 +16,13 @@ gui screen;
 gpu g(&c, &screen);
 
 void step() {
+    int extended = 0;
     uint16_t opcode = c.read(c.pc);
     // if opcode is 0xcb then we have to execute the next byte
     // from the extended instruction set
     if (opcode == 0xcb)
     {
+        extended = 1;
         opcode = c.read(c.pc + 1) + 0xff;
         c.pc += 1;
     }
@@ -30,6 +32,8 @@ void step() {
     // interrupt checking
     if (executed == 0)
     {
+        if (extended == 1)
+            printf("from extended instruction set\n");
         printf("opcode in hex = %x, decimal = %d\n", opcode, opcode);
         printf("unable to execute, stopping...\n");
         c.status();
@@ -40,7 +44,7 @@ void step() {
     {
         c.pc += inst_set[opcode].size;
     }
-    // printf("opcode = %02x, Instruction name: %s\n", opcode,inst_set[opcode].name.c_str());
+    printf("%04x %02x %s\n", c.pc, opcode,inst_set[opcode].name.c_str());
     // c.status();
     c.time += c.t;
     g.step();

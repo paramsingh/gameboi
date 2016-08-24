@@ -6,6 +6,7 @@
 *.gb
 *.bin
 *.txt
+*out
 gameboi
 
 # Precompiled Headers

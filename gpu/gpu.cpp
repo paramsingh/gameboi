@@ -163,8 +163,19 @@ void gpu::render_tiles()
     bool is_signed;
 
     uint8_t scrollx = c->read(0xff43), scrolly = c->read(0xff42);
+    uint8_t windowx = c->read(0xff4b) - 7, windowy = c->read(0xff4a);
+
+    int using_window = 0;
     // get the value in control register
     uint8_t control = c->read(lcd_control);
+
+    if ((control >> 5) & 1)
+    {
+        if (line >= windowy)
+            using_window = 1;
+    }
+
+
     // test bit 4 of the control register
     if ((control >> 4) & 1)
     {
@@ -182,14 +193,26 @@ void gpu::render_tiles()
     // if bit is 1, then render from 0x9c00
     // else render from 0x9800
     uint16_t tilemap;
-
-    if ((control >> 3) & 1)
-        tilemap = 0x9c00;
+    if (!using_window)
+    {
+        if ((control >> 3) & 1)
+            tilemap = 0x9c00;
+        else
+            tilemap = 0x9800;
+    }
     else
-        tilemap = 0x9800;
+    {
+        if ((control >> 6) & 1)
+            tilemap = 0x9c00;
+        else
+            tilemap = 0x9800;
+    }
 
     // find which y out of the 256 x 256 background we're drawing
     uint8_t y = scrolly + line;
+    if (using_window)
+        y = line - windowy;
+
     // which row in the 32 x 32 matrix of mapping will contain
     // the y line
     uint16_t tile_row = ((uint8_t)(y / 8));
@@ -198,6 +221,11 @@ void gpu::render_tiles()
     {
         flag = 0;
         uint8_t x = i + scrollx;
+        if (using_window)
+        {
+            if (i >= windowx)
+                x = i - windowx;
+        }
 
         // which column will contain the x line
         uint16_t tile_column = x / 8;

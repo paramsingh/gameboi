@@ -305,3 +305,49 @@ int sub(cpu* c)
     c->a = c->a - data;
     return 1;
 }
+
+int add(cpu* c)
+{
+    uint8_t opcode = c->read(c->pc);
+    uint8_t data;
+    c->t = 4;
+    if (opcode == 0x87)
+        data = c->a;
+    else if (opcode == 0x80)
+        data = c->b;
+    else if (opcode == 0x81)
+        data = c->c;
+    else if (opcode == 0x82)
+        data = c->d;
+    else if (opcode == 0x83)
+        data = c->e;
+    else if (opcode == 0x84)
+        data = c->h;
+    else if (opcode == 0x85)
+        data = c->l;
+    else if (opcode == 0x86)
+    {
+        c->t = 8;
+        uint16_t addr = c->h;
+        addr = (addr << 8) | c->l;
+        data = c->read(addr);
+    }
+    else if (opcode == 0xc6)
+    {
+        c->t = 8;
+        data = c->read(c->pc);
+    }
+
+    uint16_t val = data; // implicit conversion of data to 16 bits
+    val += c->a;
+
+    // set the flags
+    c->zero = (val & 0xff) == 0;
+    c->carry = (val >> 8) & 1;
+    uint8_t half = (c->a & 0xf) + (data & 0xf);
+    c->half_carry = (half >> 4) & 1;
+    c->subtract = 0;
+
+    c->a += data;
+    return 1;
+}
