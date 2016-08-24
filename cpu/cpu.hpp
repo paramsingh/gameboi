@@ -34,14 +34,19 @@ struct cpu
 
 
 	// Interrupts
-	// handle interrupts
+	int interrupts_enabled;
 	void do_interrupts();
-
-	// request interrupt
 	void request_interrupt(int id);
-
-	// service interrupt
 	void service_interrupt(int id);
+
+
+	// timer related stuff
+	int timer_counter;
+	int divide_counter;
+	int timer_on();
+	void update_timers();
+	void divider();
+	void setfreq();
 
 };
 

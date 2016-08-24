@@ -1,3 +1,6 @@
+
+const int clock_speed = 4194304;
+
 cpu::cpu()
 {
 	memset(memory, 0, sizeof(memory));
@@ -14,6 +17,8 @@ cpu::cpu()
 	zero = carry = half_carry = subtract = 0;
 	booting = 1;
 	sp = 0xfffe;
+	timer_counter = 1024;
+	interrupts_enabled = 0;
 }
 
 void cpu::status()
@@ -62,6 +67,8 @@ void cpu::write(uint16_t addr, uint8_t val)
 		return;
 	else if (addr == 0xff44) // tries to write to the scanline register
 		memory[addr] = 0;
+	else if (addr == 0xff04) // divider register
+		memory[addr] = 0;
 	else
 		memory[addr] = val;
 }
@@ -89,4 +96,118 @@ void cpu::set_f(uint8_t val)
 	subtract   = (val >> 6) & 1;
 	half_carry = (val >> 5) & 1;
 	carry      = (val >> 4) & 1;
+}
+
+
+// timer related functions
+const uint16_t timer 	     = 0xff05;
+const uint16_t timer_mod     = 0xff06;
+const uint16_t timer_control = 0xff07;
+const uint16_t divider_reg   = 0xff04;
+
+int cpu::timer_on()
+{
+	uint8_t control = read(timer_control);
+	return (control >> 2) & 1;
+}
+
+void cpu::update_timers()
+{
+	divider();
+	if (timer_on())
+	{
+		timer_counter -= t;
+		if (timer_counter <= 0)
+		{
+			setfreq();
+			uint8_t val = read(timer);
+			if (timer == 0xff)
+			{
+				write(timer, read(timer_mod));
+				// TODO: Request Interrupt
+			}
+			else
+			{
+				write(timer, val + 1);
+			}
+		}
+	}
+}
+
+void cpu::setfreq()
+{
+	uint8_t	freq = read(timer_control) & 0x3;
+	if (freq == 0)
+		timer_counter = 1024;
+	else if (freq == 1)
+		timer_counter = 16;
+	else if (freq == 2)
+		timer_counter = 64;
+	else if (freq == 3)
+		timer_counter = 256;
+}
+
+void cpu::divider()
+{
+	divide_counter += t;
+	if (divide_counter >= 255)
+	{
+		divide_counter = 0;
+		memory[divider_reg]++;
+	}
+}
+
+// interrupts
+const uint16_t ier = 0xffff;
+const uint16_t irr = 0xff0f;
+
+void cpu::request_interrupt(int id)
+{
+	uint8_t data = read(irr);
+	data |= (1 << id);
+	write(irr, data);
+}
+
+void cpu::service_interrupt(int id)
+{
+	// disable interrupts
+	interrupts_enabled = 0;
+
+	// change the irr so that cpu knows that interrupt has been
+	// serviced
+	uint8_t requests = read(irr);
+	requests &= ~(1 << id);
+	write(irr, requests);
+
+	// push program counter into stack
+	sp--;
+	write(sp, (pc >> 8) & 0xff);
+	sp--;
+	write(sp, pc & 0xff);
+
+	if (id == 0) // vblank
+		pc = 0x40;
+	else if (id == 1) // lcd
+		pc = 0x48;
+	else if (id == 2) // timer
+		pc = 0x50;
+	else if (id == 0x60) // joypad
+		pc = 0x60;
+}
+
+void cpu::do_interrupts()
+{
+	if (interrupts_enabled)
+	{
+		uint8_t requests = read(irr);
+		uint8_t enabled = read(ier);
+		for (int id = 0; id <= 4; id++)
+		{
+			if ((requests >> id) & 1)
+			{
+				if ((enabled >> id) & 1)
+					service_interrupt(id);
+			}
+		}
+	}
 }

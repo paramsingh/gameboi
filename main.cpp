@@ -10,14 +10,19 @@ using namespace std;
 #include "gpu/gpu.hpp"
 #include "gpu/gpu.cpp"
 
+const int fps = 60;
+const int ticks_per_frame = 1000 / 60;
+
 // TODO: Get this stuff into a gameboy class maybe
 cpu c;
 gui screen;
 gpu g(&c, &screen);
 
-void step() {
+
+void execute_instruction() {
     int extended = 0;
     uint16_t opcode = c.read(c.pc);
+
     // if opcode is 0xcb then we have to execute the next byte
     // from the extended instruction set
     if (opcode == 0xcb)
@@ -26,10 +31,8 @@ void step() {
         opcode = c.read(c.pc + 1) + 0xff;
         c.pc += 1;
     }
+
     int executed = inst_set[opcode].func(&c);
-    // TODO:
-    // timer update
-    // interrupt checking
     if (executed == 0)
     {
         if (extended == 1)
@@ -45,9 +48,21 @@ void step() {
         c.pc += inst_set[opcode].size;
     }
     printf("%04x %02x %s\n", c.pc, opcode,inst_set[opcode].name.c_str());
-    // c.status();
     c.time += c.t;
-    g.step();
+}
+
+void emulate() {
+    int max_cycles = 69905; //  frequency of gameboy / 60
+    int cycles = 0;
+    while (cycles < max_cycles)
+    {
+        execute_instruction();
+        g.step();
+        c.update_timers();
+        c.do_interrupts();
+        cycles += c.t;
+    }
+    g.draw_pixels();
 }
 
 int main()
@@ -57,6 +72,7 @@ int main()
     int flag = 1;
     int quit = 0;
     SDL_Event e;
+    //LTimer fps;
     while (!quit)
     {
         while(SDL_PollEvent(&e) != 0)
@@ -67,7 +83,7 @@ int main()
                 quit = 1;
             }
         }
-        step();
+        emulate();
     }
     return 0;
 }
