@@ -187,8 +187,59 @@ int ret(cpu* c)
             c->t = 20;
         return 2;
     }
-    else {
+    else
+    {
         c->t = 8;
         return 1;
     }
+}
+
+int reti(cpu* c)
+{
+    c->t = 16;
+    uint16_t lo = c->read(c->sp);
+    uint16_t hi = c->read(c->sp + 1);
+    c->sp += 2;
+    c->pc = (hi << 8) | lo;
+    c->interrupts_enabled = 1;
+    return 2;
+}
+
+int rst(cpu* c)
+{
+    c->t = 32;
+    uint16_t val = c->pc + 2;
+    uint8_t lo =  val & 0xff;
+    uint8_t hi = (val >> 8) & 0xff;
+    c->sp--;
+    c->write(c->sp, hi);
+    c->sp--;
+    c->write(c->sp, lo);
+    uint8_t opcode = c->read(c->pc);
+    if (opcode == 0xc7)
+        c->pc = 0;
+    else if (opcode == 0xcf)
+        c->pc = 0x08;
+    else if (opcode == 0xd7)
+        c->pc = 0x10;
+    else if (opcode == 0xdf)
+        c->pc = 0x18;
+    else if (opcode == 0xe7)
+        c->pc = 0x20;
+    else if (opcode == 0xef)
+        c->pc = 0x28;
+    else if (opcode == 0xf7)
+        c->pc = 0x30;
+    else if (opcode == 0xff)
+        c->pc = 0x38;
+    return 2;
+}
+
+int jphl(cpu* c)
+{
+    c->t = 4;
+    uint16_t addr = c->h;
+    addr = (addr << 8) | c->l;
+    c->pc = addr;
+    return 2;
 }

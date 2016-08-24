@@ -16,8 +16,7 @@ struct cpu
 	// constructor
 	cpu();
 
-	// print the status of the cpu
-	void status();
+
 
 	// read and write 8 bit values into memory
 	uint8_t read(uint16_t);
@@ -35,6 +34,8 @@ struct cpu
 
 	// Interrupts
 	int interrupts_enabled;
+	int pending_enable;
+	int pending_disable;
 	void do_interrupts();
 	void request_interrupt(int id);
 	void service_interrupt(int id);
@@ -48,6 +49,17 @@ struct cpu
 	void divider();
 	void setfreq();
 
+	// dma transfer
+	void dma(uint8_t);
+
+	// joypad
+	uint8_t joypad_state; // high bits for direction and low bits for standard buttons
+	uint8_t get_joypad_state();
+	void key_pressed(int key);
+
+	// debugging
+	void status();
+	void memory_dump(char*, uint16_t, uint16_t);
 };
 
 /*

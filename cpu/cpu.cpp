@@ -19,6 +19,7 @@ cpu::cpu()
 	sp = 0xfffe;
 	timer_counter = 1024;
 	interrupts_enabled = 0;
+	joypad_state = 0xff;
 }
 
 void cpu::status()
@@ -48,7 +49,10 @@ uint8_t cpu::read(uint16_t addr)
 		else if (pc == 0x0100)
 			booting = 0;
 	}
-	return memory[addr];
+	if (addr == 0xff00) // joypad
+		return get_joypad_state();
+	else
+		return memory[addr];
 }
 
 void cpu::write(uint16_t addr, uint8_t val)
@@ -69,6 +73,9 @@ void cpu::write(uint16_t addr, uint8_t val)
 		memory[addr] = 0;
 	else if (addr == 0xff04) // divider register
 		memory[addr] = 0;
+	else if (addr == 0xff46)
+		dma(val);
+
 	else
 		memory[addr] = val;
 }
@@ -181,8 +188,10 @@ void cpu::service_interrupt(int id)
 
 	// push program counter into stack
 	sp--;
+	printf("push %02x\n", (pc >> 8) & 0xff);
 	write(sp, (pc >> 8) & 0xff);
 	sp--;
+	printf("push %02x\n", pc & 0xff);
 	write(sp, pc & 0xff);
 
 	if (id == 0) // vblank
@@ -191,8 +200,10 @@ void cpu::service_interrupt(int id)
 		pc = 0x48;
 	else if (id == 2) // timer
 		pc = 0x50;
-	else if (id == 0x60) // joypad
+	else if (id == 4) // joypad
 		pc = 0x60;
+
+	//printf("interrupt serviced, pc = %04x\n", pc);
 }
 
 void cpu::do_interrupts()
@@ -201,7 +212,8 @@ void cpu::do_interrupts()
 	{
 		uint8_t requests = read(irr);
 		uint8_t enabled = read(ier);
-		for (int id = 0; id <= 4; id++)
+		//printf("requests = %04x, enabled = %04x\n", requests, enabled);
+		for (int id = 0; id <= 3; id++)
 		{
 			if ((requests >> id) & 1)
 			{
@@ -210,4 +222,48 @@ void cpu::do_interrupts()
 			}
 		}
 	}
+}
+
+
+void cpu::memory_dump(char* filename, uint16_t start, uint16_t end)
+{
+	FILE* f = fopen(filename, "wb");
+	fwrite(memory + start, sizeof(uint8_t), end - start + 1, f);
+	fclose(f);
+}
+
+void cpu::dma(uint8_t data)
+{
+	printf("DMA transfer\n");
+	uint16_t addr = data << 8;
+	for (int i = 0; i < 0xa0; i++)
+		write(0xfe00 + i, read(addr + i));
+}
+
+uint8_t	cpu::get_joypad_state()
+{
+	uint8_t what = memory[0xff00];
+	int bit4 = (what >> 4) & 1;
+	int bit5 = (what >> 5) & 1;
+	if (bit4 == 0)
+	{
+		for (int i = 4; i < 8; i++)
+		{
+			if ((joypad_state >> i) & 1)
+				what |= (1 << (i - 4));
+			else
+				what &= ~(1 << (i - 4));
+		}
+	}
+	else if (bit5 == 0)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			if ((joypad_state >> i) & 1)
+				what |= (1 << i);
+			else
+				what &= ~(1 << i);
+		}
+	}
+	return what;
 }

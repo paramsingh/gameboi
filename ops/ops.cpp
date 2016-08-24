@@ -30,9 +30,9 @@ operation inst_set[512] = {
 	// 7
 	op,
 	// 8
-	op,
+	operation("LD (nn), SP", 3, 20, load_sp_to_mem),
 	// 9
-	op,
+	operation("ADD HL, BC", 1, 8, add_pair),
 	// 10
 	operation("LD A (BC)", 1, 8, load_aindirect),
 	// 11
@@ -64,7 +64,7 @@ operation inst_set[512] = {
 	// 24
 	operation("JR n", 2, 8, jr),
 	// 25
-	op,
+	operation("ADD HL, DE", 1, 8, add_pair),
 	// 26
 	operation("LD A (DE)", 1, 8, load_aindirect),
 	// 27
@@ -96,7 +96,7 @@ operation inst_set[512] = {
 	// 40
 	operation("JR Z n", 2, 8, jr),
 	// 41
-	op,
+	operation("ADD HL, HL", 1, 8, add_pair),
 	// 42
 	operation("LDI HL A", 1, 8, ldia_hl),
 	// 43
@@ -108,7 +108,7 @@ operation inst_set[512] = {
 	// 46
 	operation("LD L n",2, 8, load_memtor),
 	// 47
-	op,
+	operation("CPL", 1, 4, cpl),
 	// 48
 	operation("JR NC n", 2, 8, jr),
 	// 49
@@ -124,11 +124,11 @@ operation inst_set[512] = {
 	// 54
 	operation("LD (HL) n", 1, 12, load_rtomem),
 	// 55
-	op,
+	operation("SCF", 1, 4, scf),
 	// 56
 	operation("JR C n", 2, 8, jr),
 	// 57
-	op,
+	operation("ADD HL, SP", 1, 8, load_pair),
 	// 58
 	op,
 	// 59
@@ -284,7 +284,7 @@ operation inst_set[512] = {
 	// 134
 	operation("ADD (HL)", 1, 8, add),
 	// 135
-	op,
+	operation("ADD A", 1, 4, add),
 	// 136
 	op,
 	// 137
@@ -412,7 +412,7 @@ operation inst_set[512] = {
 	// 198
 	operation("ADD n", 1, 8, add),
 	// 199
-	op,
+	operation("RST 0x00", 2, 32, rst),
 	// 200
 	operation("RET Z", 1, 8, ret),
 	// 201
@@ -428,7 +428,7 @@ operation inst_set[512] = {
 	// 206
 	op,
 	// 207
-	op,
+	operation("RST 0x08", 2, 32, rst),
 	// 208
 	operation("RET NC", 1, 8, ret),
 	// 209
@@ -444,11 +444,11 @@ operation inst_set[512] = {
 	// 214
 	operation("SUB n", 2, 8, sub),
 	// 215
-	op,
+	operation("RST 10", 1, 32, rst),
 	// 216
 	operation("RET C", 1, 8, ret),
 	// 217
-	op,
+	operation("RETI", 1, 16, reti),
 	// 218
 	operation("JP C nn", 3, 12, jp),
 	// 219
@@ -460,7 +460,7 @@ operation inst_set[512] = {
 	// 222
 	op,
 	// 223
-	op,
+	operation("RST 18", 1, 32, rst),
 	// 224
 	operation("LD ($FF00 +n),A", 2,12,ld),
 	// 225
@@ -476,11 +476,11 @@ operation inst_set[512] = {
 	// 230
 	operation("AND n", 2, 8, andop),
 	// 231
-	op,
+	operation("RST 20", 1, 32, rst),
 	// 232
 	op,
 	// 233
-	op,
+	operation("JP HL", 1, 4, jphl),
 	// 234
 	operation("LD (nn) A", 3, 16, load_atomem),
 	// 235
@@ -492,7 +492,7 @@ operation inst_set[512] = {
 	// 238
 	operation("XOR A n", 2, 8, xorop),
 	// 239
-	op,
+	operation("RST 28", 0, 32, rst),
 	// 240
 	operation("LD A, (0xff00 + n)", 2, 12, ldh_an),
 	// 241
@@ -508,7 +508,7 @@ operation inst_set[512] = {
 	// 246
 	operation("OR n", 2, 8, orop),
 	// 247
-	op,
+	operation("RST 30", 1, 32, rst),
 	// 248
 	op,
 	// 249
@@ -524,7 +524,7 @@ operation inst_set[512] = {
 	// 254
 	operation("CMP #", 2, 8, cmp),
 	// 255
-	op,
+	operation("RST 38", 1, 32, rst),
 	// 256
 	op,
 	// 257
@@ -620,21 +620,21 @@ operation inst_set[512] = {
 	// 302
 	op,
 	// 303
-	op,
+	operation("SWAP B", 1, 8, swapop),
 	// 304
-	op,
+	operation("SWAP C", 1, 8, swapop),
 	// 305
-	op,
+	operation("SWAP D", 1, 8, swapop),
 	// 306
-	op,
+	operation("SWAP E", 1, 8, swapop),
 	// 307
-	op,
+	operation("SWAP H", 1, 8, swapop),
 	// 308
-	op,
+	operation("SWAP L", 1, 8, swapop),
 	// 309
-	op,
+	operation("SWAP (HL)", 1, 16, swapop),
 	// 310
-	op,
+	operation("SWAP A", 1, 8, swapop),
 	// 311
 	op,
 	// 312

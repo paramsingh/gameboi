@@ -17,12 +17,15 @@ const int ticks_per_frame = 1000 / 60;
 cpu c;
 gui screen;
 gpu g(&c, &screen);
+int flag = 0;
 
 
-void execute_instruction() {
+inline void execute_instruction() {
     int extended = 0;
     uint16_t opcode = c.read(c.pc);
-
+    if (flag == 1) {
+        printf("opcode = %02x, pc = %04x\n", opcode, c.pc);
+    }
     // if opcode is 0xcb then we have to execute the next byte
     // from the extended instruction set
     if (opcode == 0xcb)
@@ -43,28 +46,48 @@ void execute_instruction() {
         printf("\n");
         exit(0);
     }
-    else if(executed == 1)
+    else if (executed == 1)
     {
         c.pc += inst_set[opcode].size;
         //if (opcode == 0xf3)
             //printf("size = %d\n", inst_set[opcode].size);
     }
-    //printf("%04x %02x %s\n", c.pc, opcode,inst_set[opcode].name.c_str());
-    c.time += c.t;
-}
 
+    if (c.pc == 0x0346)
+    {
+        printf("success\n");
+        printf("opcode = %02x\n", c.read(c.pc));
+        flag = 1;
+    }
+    c.time += c.t;
+    if (flag == 1)
+    {
+        printf("%04x %02x %s\n", c.pc, opcode,inst_set[opcode].name.c_str());
+        c.status();
+        getchar();
+    }
+}
+int fc = 0;
 void emulate() {
     int max_cycles = 69905; //  frequency of gameboy / 60
     int cycles = 0;
-    while (cycles < max_cycles)
+    execute_instruction();
+    if (c.pending_enable == 1 && c.read(c.pc - 1) != 0xfb)
     {
-        execute_instruction();
-        g.step();
-        c.update_timers();
-        c.do_interrupts();
-        cycles += c.t;
+        c.interrupts_enabled = 1;
+        c.pending_enable = 0;
     }
-    g.draw_pixels();
+    if (c.pending_disable == 1 && c.read(c.pc - 1) != 0xf3)
+    {
+        c.interrupts_enabled = 0;
+        c.pending_disable = 0;
+    }
+    g.step();
+    c.update_timers();
+    c.do_interrupts();
+    cycles += c.t;
+    fc++;
+    //printf("fc = %d\n", fc);
 }
 
 int main()

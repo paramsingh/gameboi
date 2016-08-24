@@ -456,3 +456,76 @@ int add(cpu* c)
     c->a += data;
     return 1;
 }
+
+int cpl(cpu* c)
+{
+    c->t = 4;
+    c->a = ~(c->a);
+    c->subtract = c->half_carry = 1;
+    return 1;
+}
+
+int swapop(cpu* c)
+{
+    c->t = 8;
+    uint8_t opcode = c->read(c->pc);
+    c->subtract = c->half_carry = c->carry = 0;
+    uint8_t* reg;
+    if (opcode == 0x37)
+        reg = &(c->a);
+    else if (opcode == 0x30)
+        reg = &(c->b);
+    else if (opcode == 0x31)
+        reg = &(c->c);
+    else if (opcode == 0x32)
+        reg = &(c->d);
+    else if (opcode == 0x33)
+        reg = &(c->e);
+    else if (opcode == 0x34)
+        reg = &(c->h);
+    else if (opcode == 0x35)
+        reg = &(c->l);
+    else if (opcode == 0x36)
+    {
+        c->t = 16;
+        uint16_t addr = c->h;
+        addr = (addr << 8) | c->l;
+        uint8_t data = c->read(addr);
+        uint8_t val = (data >> 4);
+        val |= (data << 4);
+        c->write(addr, val);
+        c->zero = (val == 0);
+        return 1;
+    }
+
+    uint8_t val = (*reg) >> 4;
+    val |= ((*reg) << 4);
+    *reg = val;
+    c->zero = (val == 0);
+    return 1;
+}
+
+int add_pair(cpu* c)
+{
+    uint8_t opcode = c->read(c->pc);
+    c->t = 8;
+    uint16_t hi, lo;
+    if (opcode == 0x09)
+        hi = c->b, lo = c->c;
+    else if (opcode == 0x19)
+        hi = c->d, lo = c->e;
+    else if (opcode == 0x29)
+        hi = c->h, lo = c->l;
+    else if (opcode == 0x39)
+        hi = (c->sp) >> 8, lo = (c->sp) & 0xff;
+
+    uint16_t val = (hi << 8) | lo;
+    uint16_t hl = (((uint16_t)(c->h)) << 8) | c->l;
+    c->subtract = 0;
+    c->half_carry = (((val & 0xfff) + (hl & 0xfff)) >> 12) & 1; // set if carry from bit 11
+    c->carry = (((uint32_t)val + hl) >> 16) & 1; // set if carry from bit 15
+    uint16_t ans = val + hl;
+    c->h = ans >> 8;
+    c->l = ans & 0xff;
+    return 1;
+}

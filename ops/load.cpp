@@ -430,3 +430,13 @@ int ldia_hl(cpu* c)
     c->l = addr & 0xff;
     return 1;
 }
+
+int load_sp_to_mem(cpu* c)
+{
+    c->t = 20;
+    uint16_t lo = c->read(c->pc + 1);
+    uint16_t hi = c->read(c->pc + 2);
+    uint16_t addr = (hi << 8) | lo;
+    c->write(addr, c->sp);
+    return 1;
+}

@@ -8,6 +8,8 @@
 *.txt
 *out
 gameboi
+*.dump
+*.dum
 
 # Precompiled Headers
 *.gch

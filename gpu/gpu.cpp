@@ -95,7 +95,8 @@ void gpu::step()
                 change_mode(1);
                 // TODO: Request an interrupt also here
                 cnt++;
-                //draw_pixels();
+                c->request_interrupt(0);
+                draw_pixels();
             }
             else
             {
