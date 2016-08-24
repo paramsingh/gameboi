@@ -46,8 +46,10 @@ void execute_instruction() {
     else if(executed == 1)
     {
         c.pc += inst_set[opcode].size;
+        //if (opcode == 0xf3)
+            //printf("size = %d\n", inst_set[opcode].size);
     }
-    printf("%04x %02x %s\n", c.pc, opcode,inst_set[opcode].name.c_str());
+    //printf("%04x %02x %s\n", c.pc, opcode,inst_set[opcode].name.c_str());
     c.time += c.t;
 }
 
@@ -68,8 +70,6 @@ void emulate() {
 int main()
 {
     screen.init();
-    int count= 0;
-    int flag = 1;
     int quit = 0;
     SDL_Event e;
     //LTimer fps;

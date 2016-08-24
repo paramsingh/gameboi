@@ -83,6 +83,45 @@ int xorop(cpu* c)
     return 1;
 }
 
+int orop(cpu* c)
+{
+    uint8_t opcode = c->read(c->pc);
+    c->t = 4;
+    uint8_t data;
+    if (opcode == 0xb7)
+        data = c->a;
+    else if (opcode == 0xb0)
+        data = c->b;
+    else if (opcode == 0xb1)
+        data = c->c;
+    else if (opcode == 0xb2)
+        data = c->d;
+    else if (opcode == 0xb3)
+        data = c->e;
+    else if (opcode == 0xb4)
+        data = c->h;
+    else if (opcode == 0xb5)
+        data = c->l;
+    else if (opcode == 0xb6)
+    {
+        c->t = 8;
+        uint16_t addr = c->h;
+        addr = (addr << 8) | c->l;
+        data = c->read(addr);
+    }
+    else if (opcode == 0xf6)
+    {
+        c->t = 8;
+        data = c->read(c->pc + 1);
+    }
+
+    // or a and data and put it in a
+    c->a |= data;
+    c->zero = (c->a == 0);
+    c->carry = c->half_carry = c->subtract = 0;
+    return 1;
+}
+
 int bit7(cpu* c)
 {
     uint8_t opcode = c->read(c->pc);
@@ -115,6 +154,45 @@ int bit7(cpu* c)
     return 1;
 }
 
+int andop(cpu* c)
+{
+    uint8_t opcode = c->read(c->pc);
+    c->t = 4;
+    uint8_t data;
+    if (opcode == 0xa7)
+        data = c->a;
+    else if (opcode == 0xa0)
+        data = c->b;
+    else if (opcode == 0xa1)
+        data = c->c;
+    else if (opcode == 0xa2)
+        data = c->d;
+    else if (opcode == 0xa3)
+        data = c->e;
+    else if (opcode == 0xa4)
+        data = c->h;
+    else if (opcode == 0xa5)
+        data = c->l;
+    else if (opcode == 0xa6)
+    {
+        c->t = 8;
+        uint16_t addr = c->h;
+        addr = (addr << 8) | c->l;
+        data = c->read(addr);
+    }
+    else if (opcode == 0xe6)
+    {
+        c->t = 8;
+        data = c->read(c->pc + 1);
+    }
+
+    // and a and data and put it in a
+    c->a &= data;
+    c->zero = (c->a == 0);
+    c->half_carry = 1;
+    c->carry = c->subtract = 0;
+    return 1;
+}
 
 int inc(cpu *c)
 {
@@ -148,7 +226,7 @@ int inc(cpu *c)
     }
     // now have to increase value in reg by 1
     // if the lower bits are all one, then half carry will be set
-    if ((*reg) & 0xf == 1)
+    if (((*reg) & 0xf) == 1)
         c->half_carry = 1;
     else
         c->half_carry = 0;
@@ -188,6 +266,33 @@ int inc_pair(cpu* c)
     return 1;
 }
 
+int dec_pair(cpu* c)
+{
+    uint8_t opcode = c->read(c->pc);
+    uint8_t *hi, *lo;
+    c->t = 8;
+    if (opcode == 0x0b)
+        // decrement the bc pair
+        hi = &(c->b), lo = &(c->c);
+    else if (opcode == 0x1b)
+        // decrement the de pair
+        hi = &(c->d), lo = &(c->e);
+    else if (opcode == 0x2b)
+        // decrement the hl pair
+        hi = &(c->h), lo = &(c->l);
+    else if (opcode == 0x3b) {
+        // decrement the stack pointer
+        c->sp--;
+        return 1;
+    }
+
+    uint16_t val = (((uint16_t)(*hi)) << 8) | (*lo);
+    val--;
+    *hi = val >> 8;
+    *lo = val;
+    return 1;
+}
+
 int dec(cpu* c)
 {
     uint8_t opcode = c->read(c->pc);
@@ -216,7 +321,7 @@ int dec(cpu* c)
 
     // now have to decrease value in reg by 1
     // if the lower bits are all zero, then half carry will be set
-    if ((*reg) & 0xf == 0)
+    if (((*reg) & 0xf) == 0)
         c->half_carry = 1;
     else
         c->half_carry = 0;

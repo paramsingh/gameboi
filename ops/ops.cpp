@@ -1,6 +1,7 @@
 #include "load.cpp"
 #include "arithmetic.cpp"
 #include "control.cpp"
+#include "misc.cpp"
 
 int  not_imp(cpu* c)
 {
@@ -35,7 +36,7 @@ operation inst_set[512] = {
 	// 10
 	operation("LD A (BC)", 1, 8, load_aindirect),
 	// 11
-	op,
+	operation("DEC BC", 1, 8, dec_pair),
 	// 12
 	operation("INC C",1,4,inc),
 	// 13
@@ -67,7 +68,7 @@ operation inst_set[512] = {
 	// 26
 	operation("LD A (DE)", 1, 8, load_aindirect),
 	// 27
-	op,
+	operation("DEC DE", 1, 8, dec_pair),
 	// 28
 	operation("INC E", 1, 4, inc),
 	// 29
@@ -97,9 +98,9 @@ operation inst_set[512] = {
 	// 41
 	op,
 	// 42
-	op,
+	operation("LDI HL A", 1, 8, ldia_hl),
 	// 43
-	op,
+	operation("DEC HL", 1, 8, dec_pair),
 	// 44
 	operation("INC L", 1, 4, inc),
 	// 45
@@ -121,7 +122,7 @@ operation inst_set[512] = {
 	// 53
 	operation("DEC (HL)", 1, 12, dec),
 	// 54
-	op,
+	operation("LD (HL) n", 1, 12, load_rtomem),
 	// 55
 	op,
 	// 56
@@ -131,7 +132,7 @@ operation inst_set[512] = {
 	// 58
 	op,
 	// 59
-	op,
+	operation("DEC SP", 1, 8, dec_pair),
 	// 60
 	operation("INC A",1,4,inc),
 	// 61
@@ -333,21 +334,21 @@ operation inst_set[512] = {
 	// 159
 	op,
 	// 160
-	op,
+	operation("AND B", 1, 4, andop),
 	// 161
-	op,
+	operation("AND C", 1, 4, andop),
 	// 162
-	op,
+	operation("AND D", 1, 4, andop),
 	// 163
-	op,
+	operation("AND E", 1, 4, andop),
 	// 164
-	op,
+	operation("AND H", 1, 4, andop),
 	// 165
-	op,
+	operation("AND L", 1, 4, andop),
 	// 166
-	op,
+	operation("AND (HL)", 1, 4, andop),
 	// 167
-	op,
+	operation("AND A", 1, 4, andop),
 	// 168
 	operation("XOR B", 1, 4, xorop),
 	// 169
@@ -365,19 +366,19 @@ operation inst_set[512] = {
 	// 175
 	operation("XOR A", 1, 4, xorop),
 	// 176
-	op,
+	operation("OR B", 1, 4, orop),
 	// 177
-	op,
+	operation("OR C", 1, 4, orop),
 	// 178
-	op,
+	operation("OR D", 1, 4, orop),
 	// 179
-	op,
+	operation("OR E", 1, 4, orop),
 	// 180
-	op,
+	operation("OR H", 1, 4, orop),
 	// 181
-	op,
+	operation("OR L", 1, 4, orop),
 	// 182
-	op,
+	operation("OR (HL)", 1, 8, orop),
 	// 183
 	op,
 	// 184
@@ -473,7 +474,7 @@ operation inst_set[512] = {
 	// 229
 	operation("PUSH HL", 1, 16, push),
 	// 230
-	op,
+	operation("AND n", 2, 8, andop),
 	// 231
 	op,
 	// 232
@@ -499,13 +500,13 @@ operation inst_set[512] = {
 	// 242
 	op,
 	// 243
-	op,
+	operation("DI", 1, 4, di),
 	// 244
 	op,
 	// 245
 	operation("PUSH AF", 1, 16, push),
 	// 246
-	op,
+	operation("OR n", 2, 8, orop),
 	// 247
 	op,
 	// 248
@@ -515,7 +516,7 @@ operation inst_set[512] = {
 	// 250
 	operation("LD A (nn)", 3, 16, load_aindirect),
 	// 251
-	op,
+	operation("EI", 1, 4, ei),
 	// 252
 	op,
 	// 253

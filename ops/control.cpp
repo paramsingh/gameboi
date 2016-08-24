@@ -137,7 +137,6 @@ int pop(cpu* c)
 {
     uint8_t opcode = c->read(c->pc);
     uint8_t *hi, *lo;
-    uint8_t f;
     c->t = 12;
     if (opcode == 0xc1)
         hi = &(c->b), lo = &(c->c);

@@ -152,7 +152,6 @@ void gpu::render_tiles()
 {
     if (line >= 144)
         return;
-    int flag = 0;
 
     // from where to get the tiles
     // this value will either be 0x8000 or 0x8800
@@ -219,7 +218,6 @@ void gpu::render_tiles()
 
     for (int i = 0; i < 160; i++)
     {
-        flag = 0;
         uint8_t x = i + scrollx;
         if (using_window)
         {
