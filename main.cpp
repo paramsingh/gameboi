@@ -52,13 +52,14 @@ inline void execute_instruction() {
         //if (opcode == 0xf3)
             //printf("size = %d\n", inst_set[opcode].size);
     }
-
-    if (c.pc == 0x0346)
+/*
+    if (c.pc == 0x687e)
     {
         printf("success\n");
+        c.memory_dump("gameboi.tetris.tiles.dump", 0x8000, 0x87ff);
         printf("opcode = %02x\n", c.read(c.pc));
         flag = 1;
-    }
+    }*/
     c.time += c.t;
     if (flag == 1)
     {

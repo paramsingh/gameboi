@@ -25,6 +25,7 @@ cpu::cpu()
 void cpu::status()
 {
 	printf("a = %02x\n", a);
+	printf("f = %02x\n", get_f());
 	printf("b = %02x\n", b);
 	printf("c = %02x\n", c);
 	printf("d = %02x\n", d);
@@ -188,10 +189,8 @@ void cpu::service_interrupt(int id)
 
 	// push program counter into stack
 	sp--;
-	printf("push %02x\n", (pc >> 8) & 0xff);
 	write(sp, (pc >> 8) & 0xff);
 	sp--;
-	printf("push %02x\n", pc & 0xff);
 	write(sp, pc & 0xff);
 
 	if (id == 0) // vblank
@@ -234,7 +233,6 @@ void cpu::memory_dump(char* filename, uint16_t start, uint16_t end)
 
 void cpu::dma(uint8_t data)
 {
-	printf("DMA transfer\n");
 	uint16_t addr = data << 8;
 	for (int i = 0; i < 0xa0; i++)
 		write(0xfe00 + i, read(addr + i));

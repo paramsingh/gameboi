@@ -38,7 +38,6 @@ int jr(cpu* c)
 
 int jp(cpu* c)
 {
-    // add value n to the pc according to some condition
     uint8_t opcode = c->read(c->pc);
 
     int condition;
@@ -64,10 +63,11 @@ int jp(cpu* c)
         uint16_t lo = c->read(c->pc + 1);
         uint16_t hi = c->read(c->pc + 2);
         c->pc = (hi << 8) | lo;
+        return 2;
     }
     else
         c->t = 12;
-    return 2;
+    return 1;
 }
 
 int call(cpu *c)
@@ -208,7 +208,7 @@ int reti(cpu* c)
 int rst(cpu* c)
 {
     c->t = 32;
-    uint16_t val = c->pc + 2;
+    uint16_t val = c->pc + 1;
     uint8_t lo =  val & 0xff;
     uint8_t hi = (val >> 8) & 0xff;
     c->sp--;

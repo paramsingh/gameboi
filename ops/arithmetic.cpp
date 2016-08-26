@@ -28,10 +28,8 @@ int cmp(cpu* c)
         n = c->read(c->pc + 1);
         c->t = 8;
     }
-    if (c->a == n)
-        c->zero = 1;
-    else
-        c->zero = 0;
+    uint8_t val = c->a - n;
+    c->zero = (val == 0);
     c->subtract = 1;
     if (((c->a - n) & 0xf) > ((c->a) & 0xf))
         c->half_carry = 1;
@@ -527,5 +525,39 @@ int add_pair(cpu* c)
     uint16_t ans = val + hl;
     c->h = ans >> 8;
     c->l = ans & 0xff;
+    return 1;
+}
+
+int res0(cpu* c)
+{
+    // reset bit 0 in register r
+    uint8_t opcode = c->read(c->pc);
+    uint8_t* reg;
+    c->t = 8;
+    if (opcode == 0x80)
+        reg = &(c->b);
+    else if (opcode == 0x81)
+        reg = &(c->c);
+    else if (opcode == 0x82)
+        reg = &(c->d);
+    else if (opcode == 0x83)
+        reg = &(c->e);
+    else if (opcode == 0x84)
+        reg = &(c->h);
+    else if (opcode == 0x85)
+        reg = &(c->l);
+    else if (opcode == 0x86)
+    {
+        c->t = 16;
+        uint16_t addr = c->h;
+        addr = (addr << 8) | c->l;
+        uint8_t val = c->read(addr);
+        val ^= 1;
+        c->write(addr, val);
+        return 1;
+    }
+    else if (opcode == 0x87)
+        reg = &(c->a);
+    (*reg) ^= 1;
     return 1;
 }

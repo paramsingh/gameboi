@@ -780,21 +780,21 @@ operation inst_set[512] = {
 	// 382
 	op,
 	// 383
-	op,
+	operation("RES 0 B", 1, 8, res0),
 	// 384
-	op,
+	operation("RES 0 C", 1, 8, res0),
 	// 385
-	op,
+	operation("RES 0 D", 1, 8, res0),
 	// 386
-	op,
+	operation("RES 0 E", 1, 8, res0),
 	// 387
-	op,
+	operation("RES 0 H", 1, 8, res0),
 	// 388
-	op,
+	operation("RES 0 L", 1, 8, res0),
 	// 389
-	op,
+	operation("RES 0 (HL)", 1, 16, res0),
 	// 390
-	op,
+	operation("RES 0 A", 1, 8, res0),
 	// 391
 	op,
 	// 392
