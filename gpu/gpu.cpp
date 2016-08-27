@@ -172,7 +172,10 @@ void gpu::render_tiles()
     if ((control >> 5) & 1)
     {
         if (line >= windowy)
+        {
+            printf("using window\n");
             using_window = 1;
+        }
     }
 
 
@@ -285,7 +288,7 @@ void gpu::draw_pixels()
                 SDL_RenderDrawPoint(screen->renderer, j, i);
 
             }
-            if (color == 2)
+            else
             {
                 SDL_SetRenderDrawColor(screen->renderer, 0x00, 0x00, 0x00, 0xFF);
                 SDL_RenderDrawPoint(screen->renderer, j, i);

@@ -38,13 +38,7 @@ inline void execute_instruction() {
     int executed = inst_set[opcode].func(&c);
     if (executed == 0)
     {
-        if (extended == 1)
-            printf("from extended instruction set\n");
-        printf("opcode in hex = %x, decimal = %d\n", opcode, opcode);
-        printf("unable to execute, stopping...\n");
-        c.status();
-        printf("\n");
-        exit(0);
+        return;
     }
     else if (executed == 1)
     {
@@ -52,14 +46,6 @@ inline void execute_instruction() {
         //if (opcode == 0xf3)
             //printf("size = %d\n", inst_set[opcode].size);
     }
-/*
-    if (c.pc == 0x687e)
-    {
-        printf("success\n");
-        c.memory_dump("gameboi.tetris.tiles.dump", 0x8000, 0x87ff);
-        printf("opcode = %02x\n", c.read(c.pc));
-        flag = 1;
-    }*/
     c.time += c.t;
     if (flag == 1)
     {
