@@ -144,7 +144,11 @@ int bit7(cpu* c)
         c->t = 16;
         uint16_t addr = c->h;
         addr = (addr << 8) | c->l;
-        reg = c->memory + addr;
+        uint8_t val = c->read(addr);
+        c->zero = (val & (1 << 7)) == 0;
+        c->half_carry = 1;
+        c->subtract = 0;
+        return 1;
     }
     c->zero = ((*reg) & (1 << 7)) == 0;
     c->half_carry = 1;
@@ -559,5 +563,301 @@ int res0(cpu* c)
     else if (opcode == 0x87)
         reg = &(c->a);
     (*reg) ^= 1;
+    return 1;
+}
+
+int sla(cpu* c)
+{
+    // extended instruction
+    // shift left register into carry
+    // lowest bit is set to 0
+    uint8_t opcode = c->read(c->pc);
+    c->t = 8;
+    uint8_t* reg;
+    if (opcode == 0x20)
+        reg = &(c->b);
+    else if (opcode == 0x21)
+        reg = &(c->c);
+    else if (opcode == 0x22)
+        reg = &(c->d);
+    else if (opcode == 0x23)
+        reg = &(c->e);
+    else if (opcode == 0x24)
+        reg = &(c->h);
+    else if (opcode == 0x25)
+        reg = &(c->l);
+    else if (opcode == 0x26)
+    {
+        c->t = 16;
+        uint16_t addr = c->h;
+        addr = (addr << 8) | c->l;
+        uint8_t val = c->read(addr);
+        c->carry = (val >> 7) & 1;
+        val <<= 1;
+        c->write(addr, val);
+        c->zero = (val == 0);
+        c->half_carry = c->subtract = 0;
+        return 1;
+    }
+    else if (opcode == 0x27)
+        reg = &(c->a);
+
+    c->half_carry = c->subtract = 0;
+    uint8_t val = (*reg) << 1;
+    c->zero = (val == 0);
+    c->carry = ((*reg) >> 7) & 1;
+    *reg = val;
+    return 1;
+}
+
+int bit2(cpu* c)
+{
+    uint8_t opcode = c->read(c->pc);
+    uint8_t* reg;
+    c->t = 8;
+    if (opcode == 0x57)
+        reg = &(c->a);
+    else if (opcode == 0x50)
+        reg = &(c->b);
+    else if (opcode == 0x51)
+        reg = &(c->c);
+    else if (opcode == 0x52)
+        reg = &(c->d);
+    else if (opcode == 0x53)
+        reg = &(c->e);
+    else if (opcode == 0x54)
+        reg = &(c->h);
+    else if (opcode == 0x55)
+        reg = &(c->l);
+    else if (opcode == 0x56)
+    {
+        c->t = 16;
+        uint16_t addr = c->h;
+        addr = (addr << 8) | c->l;
+        uint8_t val = c->read(addr);
+        c->zero = (val & (1 << 2)) == 0;
+        c->half_carry = 1;
+        c->subtract = 0;
+        return 1;
+    }
+    c->zero = ((*reg) & (1 << 2)) == 0;
+    c->half_carry = 1;
+    c->subtract = 0;
+    return 1;
+}
+
+int bit3(cpu* c)
+{
+    uint8_t opcode = c->read(c->pc);
+    uint8_t* reg;
+    c->t = 8;
+    if (opcode == 0x5f)
+        reg = &(c->a);
+    else if (opcode == 0x58)
+        reg = &(c->b);
+    else if (opcode == 0x59)
+        reg = &(c->c);
+    else if (opcode == 0x5a)
+        reg = &(c->d);
+    else if (opcode == 0x5b)
+        reg = &(c->e);
+    else if (opcode == 0x5c)
+        reg = &(c->h);
+    else if (opcode == 0x5d)
+        reg = &(c->l);
+    else if (opcode == 0x5e)
+    {
+        c->t = 16;
+        uint16_t addr = c->h;
+        addr = (addr << 8) | c->l;
+        uint8_t val = c->read(addr);
+        c->zero = (val & (1 << 3)) == 0;
+        c->half_carry = 1;
+        c->subtract = 0;
+        return 1;
+    }
+    c->zero = ((*reg) & (1 << 3)) == 0;
+    c->half_carry = 1;
+    c->subtract = 0;
+    return 1;
+}
+
+int bit4(cpu* c)
+{
+    uint8_t opcode = c->read(c->pc);
+    uint8_t* reg;
+    c->t = 8;
+    if (opcode == 0x67)
+        reg = &(c->a);
+    else if (opcode == 0x60)
+        reg = &(c->b);
+    else if (opcode == 0x61)
+        reg = &(c->c);
+    else if (opcode == 0x62)
+        reg = &(c->d);
+    else if (opcode == 0x63)
+        reg = &(c->e);
+    else if (opcode == 0x64)
+        reg = &(c->h);
+    else if (opcode == 0x65)
+        reg = &(c->l);
+    else if (opcode == 0x66)
+    {
+        c->t = 16;
+        uint16_t addr = c->h;
+        addr = (addr << 8) | c->l;
+        uint8_t val = c->read(addr);
+        c->zero = (val & (1 << 4)) == 0;
+        c->half_carry = 1;
+        c->subtract = 0;
+        return 1;
+    }
+    c->zero = ((*reg) & (1 << 4)) == 0;
+    c->half_carry = 1;
+    c->subtract = 0;
+    return 1;
+}
+
+int bit5(cpu* c)
+{
+    uint8_t opcode = c->read(c->pc);
+    uint8_t* reg;
+    c->t = 8;
+    if (opcode == 0x6f)
+        reg = &(c->a);
+    else if (opcode == 0x68)
+        reg = &(c->b);
+    else if (opcode == 0x69)
+        reg = &(c->c);
+    else if (opcode == 0x6a)
+        reg = &(c->d);
+    else if (opcode == 0x6b)
+        reg = &(c->e);
+    else if (opcode == 0x6c)
+        reg = &(c->h);
+    else if (opcode == 0x6d)
+        reg = &(c->l);
+    else if (opcode == 0x6e)
+    {
+        c->t = 16;
+        uint16_t addr = c->h;
+        addr = (addr << 8) | c->l;
+        uint8_t val = c->read(addr);
+        c->zero = (val & (1 << 5)) == 0;
+        c->half_carry = 1;
+        c->subtract = 0;
+        return 1;
+    }
+    c->zero = ((*reg) & (1 << 5)) == 0;
+    c->half_carry = 1;
+    c->subtract = 0;
+    return 1;
+}
+
+int bit6(cpu* c)
+{
+    uint8_t opcode = c->read(c->pc);
+    uint8_t* reg;
+    c->t = 8;
+    if (opcode == 0x77)
+        reg = &(c->a);
+    else if (opcode == 0x70)
+        reg = &(c->b);
+    else if (opcode == 0x71)
+        reg = &(c->c);
+    else if (opcode == 0x72)
+        reg = &(c->d);
+    else if (opcode == 0x73)
+        reg = &(c->e);
+    else if (opcode == 0x74)
+        reg = &(c->h);
+    else if (opcode == 0x75)
+        reg = &(c->l);
+    else if (opcode == 0x76)
+    {
+        c->t = 16;
+        uint16_t addr = c->h;
+        addr = (addr << 8) | c->l;
+        uint8_t val = c->read(addr);
+        c->zero = (val & (1 << 6)) == 0;
+        c->half_carry = 1;
+        c->subtract = 0;
+        return 1;
+    }
+    c->zero = ((*reg) & (1 << 6)) == 0;
+    c->half_carry = 1;
+    c->subtract = 0;
+    return 1;
+}
+
+int bit0(cpu* c)
+{
+    uint8_t opcode = c->read(c->pc);
+    uint8_t* reg;
+    c->t = 8;
+    if (opcode == 0x47)
+        reg = &(c->a);
+    else if (opcode == 0x40)
+        reg = &(c->b);
+    else if (opcode == 0x41)
+        reg = &(c->c);
+    else if (opcode == 0x42)
+        reg = &(c->d);
+    else if (opcode == 0x43)
+        reg = &(c->e);
+    else if (opcode == 0x44)
+        reg = &(c->h);
+    else if (opcode == 0x45)
+        reg = &(c->l);
+    else if (opcode == 0x46)
+    {
+        c->t = 16;
+        uint16_t addr = c->h;
+        addr = (addr << 8) | c->l;
+        uint8_t val = c->read(addr);
+        c->zero = (val & 1) == 0;
+        c->half_carry = 1;
+        c->subtract = 0;
+        return 1;
+    }
+    c->zero = ((*reg) & 1) == 0;
+    c->half_carry = 1;
+    c->subtract = 0;
+    return 1;
+}
+
+int bit1(cpu* c)
+{
+    uint8_t opcode = c->read(c->pc);
+    uint8_t* reg;
+    c->t = 8;
+    if (opcode == 0x4f)
+        reg = &(c->a);
+    else if (opcode == 0x48)
+        reg = &(c->b);
+    else if (opcode == 0x49)
+        reg = &(c->c);
+    else if (opcode == 0x4a)
+        reg = &(c->d);
+    else if (opcode == 0x4b)
+        reg = &(c->e);
+    else if (opcode == 0x4c)
+        reg = &(c->h);
+    else if (opcode == 0x4d)
+        reg = &(c->l);
+    else if (opcode == 0x4e)
+    {
+        c->t = 16;
+        uint16_t addr = c->h;
+        addr = (addr << 8) | c->l;
+        uint8_t val = c->read(addr);
+        c->zero = (val & (1 << 1)) == 0;
+        c->half_carry = 1;
+        c->subtract = 0;
+        return 1;
+    }
+    c->zero = ((*reg) & (1 << 1)) == 0;
+    c->half_carry = 1;
+    c->subtract = 0;
     return 1;
 }

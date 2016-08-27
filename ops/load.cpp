@@ -440,3 +440,17 @@ int load_sp_to_mem(cpu* c)
     c->write(addr, c->sp);
     return 1;
 }
+
+int lddahl(cpu* c)
+{
+    // Put value at address HL into A. Decrement HL
+    // opcode = 0x3a
+    c->t = 8;
+    uint16_t addr = c->h;
+    addr = (addr << 8) | c->l;
+    c->a = c->read(addr);
+    addr--;
+    c->h = (addr >> 8) & 0xff;
+    c->l = addr & 0xff;
+    return 1;
+}

@@ -38,7 +38,10 @@ inline void execute_instruction() {
     int executed = inst_set[opcode].func(&c);
     if (executed == 0)
     {
-        return;
+        if (extended)
+            printf("extended instruction\n");
+        c.status();
+        exit(0);
     }
     else if (executed == 1)
     {
@@ -47,6 +50,9 @@ inline void execute_instruction() {
             //printf("size = %d\n", inst_set[opcode].size);
     }
     c.time += c.t;
+    if (c.pc == 0x0463) {
+        //flag = 1;
+    }
     if (flag == 1)
     {
         printf("%04x %02x %s\n", c.pc, opcode,inst_set[opcode].name.c_str());
@@ -56,7 +62,7 @@ inline void execute_instruction() {
 }
 int fc = 0;
 void emulate() {
-    int max_cycles = 69905; //  frequency of gameboy / 60
+    //int max_cycles = 69905; //  frequency of gameboy / 60
     int cycles = 0;
     execute_instruction();
     if (c.pending_enable == 1 && c.read(c.pc - 1) != 0xfb)

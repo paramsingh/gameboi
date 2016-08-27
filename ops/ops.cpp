@@ -122,7 +122,7 @@ operation inst_set[512] = {
 	// 53
 	operation("DEC (HL)", 1, 12, dec),
 	// 54
-	operation("LD (HL) n", 1, 12, load_rtomem),
+	operation("LD (HL) n", 2, 12, load_rtomem),
 	// 55
 	operation("SCF", 1, 4, scf),
 	// 56
@@ -130,7 +130,7 @@ operation inst_set[512] = {
 	// 57
 	operation("ADD HL, SP", 1, 8, load_pair),
 	// 58
-	op,
+	operation("LDD A, (HL)", 1, 8, lddahl),
 	// 59
 	operation("DEC SP", 1, 8, dec_pair),
 	// 60
@@ -588,21 +588,21 @@ operation inst_set[512] = {
 	// 286
 	op,
 	// 287
-	op,
+	operation("SLA B", 1, 8, sla),
 	// 288
-	op,
+	operation("SLA C", 1, 8, sla),
 	// 289
-	op,
+	operation("SLA D", 1, 8, sla),
 	// 290
-	op,
+	operation("SLA E", 1, 8, sla),
 	// 291
-	op,
+	operation("SLA H", 1, 8, sla),
 	// 292
-	op,
+	operation("SLA L", 1, 8, sla),
 	// 293
-	op,
+	operation("SLA (HL)", 1, 16, sla),
 	// 294
-	op,
+	operation("SLA A", 1, 8, sla),
 	// 295
 	op,
 	// 296
@@ -652,117 +652,117 @@ operation inst_set[512] = {
 	// 318
 	op,
 	// 319
-	op,
+	operation("BIT 0 B", 1, 8, bit0),
 	// 320
-	op,
+	operation("BIT 0 C", 1, 8, bit0),
 	// 321
-	op,
+	operation("BIT 0 D", 1, 8, bit0),
 	// 322
-	op,
+	operation("BIT 0 E", 1, 8, bit0),
 	// 323
-	op,
+	operation("BIT 0 H", 1, 8, bit0),
 	// 324
-	op,
+	operation("BIT 0 L", 1, 8, bit0),
 	// 325
-	op,
+	operation("BIT 0 (HL)", 1, 16, bit0),
 	// 326
-	op,
+	operation("BIT 0 A", 1, 8, bit0),
 	// 327
-	op,
+	operation("BIT 1 B", 1, 8, bit1),
 	// 328
-	op,
+	operation("BIT 1 C", 1, 8, bit1),
 	// 329
-	op,
+	operation("BIT 1 D", 1, 8, bit1),
 	// 330
-	op,
+	operation("BIT 1 E", 1, 8, bit1),
 	// 331
-	op,
+	operation("BIT 1 H", 1, 8, bit1),
 	// 332
-	op,
+	operation("BIT 1 L", 1, 8, bit1),
 	// 333
-	op,
+	operation("BIT 1 (HL)", 1, 16, bit1),
 	// 334
-	op,
+	operation("BIT 1 A", 1, 8, bit1),
 	// 335
-	op,
+	operation("BIT 2 B", 1, 8, bit2),
 	// 336
-	op,
+	operation("BIT 2 C", 1, 8, bit2),
 	// 337
-	op,
+	operation("BIT 2 D", 1, 8, bit2),
 	// 338
-	op,
+	operation("BIT 2 E", 1, 8, bit2),
 	// 339
-	op,
+	operation("BIT 2 H", 1, 8, bit2),
 	// 340
-	op,
+	operation("BIT 2 L", 1, 8, bit2),
 	// 341
-	op,
+	operation("BIT 2 (HL)", 1, 16, bit2),
 	// 342
-	op,
+	operation("BIT 2 A", 1, 8, bit2),
 	// 343
-	op,
+	operation("BIT 3 B", 1, 8, bit3),
 	// 344
-	op,
+	operation("BIT 3 C", 1, 8, bit3),
 	// 345
-	op,
+	operation("BIT 3 D", 1, 8, bit3),
 	// 346
-	op,
+	operation("BIT 3 E", 1, 8, bit3),
 	// 347
-	op,
+	operation("BIT 3 H", 1, 8, bit3),
 	// 348
-	op,
+	operation("BIT 3 L", 1, 8, bit3),
 	// 349
-	op,
+	operation("BIT 3 (HL)", 1, 16, bit3),
 	// 350
-	op,
+	operation("BIT 3 A", 1, 8, bit3),
 	// 351
-	op,
+	operation("BIT 4 B", 1, 8, bit4),
 	// 352
-	op,
+	operation("BIT 4 C", 1, 8, bit4),
 	// 353
-	op,
+	operation("BIT 4 D", 1, 8, bit4),
 	// 354
-	op,
+	operation("BIT 4 E", 1, 8, bit4),
 	// 355
-	op,
+	operation("BIT 4 H", 1, 8, bit4),
 	// 356
-	op,
+	operation("BIT 4 L", 1, 8, bit4),
 	// 357
-	op,
+	operation("BIT 4 (HL)", 1, 16, bit4),
 	// 358
-	op,
+	operation("BIT 4 A", 1, 8, bit4),
 	// 359
-	op,
+	operation("BIT 5 B", 1, 8, bit5),
 	// 360
-	op,
+	operation("BIT 5 C", 1, 8, bit5),
 	// 361
-	op,
+	operation("BIT 5 D", 1, 8, bit5),
 	// 362
-	op,
+	operation("BIT 5 E", 1, 8, bit5),
 	// 363
-	op,
+	operation("BIT 5 H", 1, 8, bit5),
 	// 364
-	op,
+	operation("BIT 5 L", 1, 8, bit5),
 	// 365
-	op,
+	operation("BIT 5 (HL)", 1, 16, bit5),
 	// 366
-	op,
+	operation("BIT 5 A", 1, 8, bit5),
 	// 367
-	op,
+	operation("BIT 6 B", 1, 8, bit6),
 	// 368
-	op,
+	operation("BIT 6 C", 1, 8, bit6),
 	// 369
-	op,
+	operation("BIT 6 D", 1, 8, bit6),
 	// 370
-	op,
+	operation("BIT 6 E", 1, 8, bit6),
 	// 371
-	op,
+	operation("BIT 6 H", 1, 8, bit6),
 	// 372
-	op,
+	operation("BIT 6 L", 1, 8, bit6),
 	// 373
-	op,
+	operation("BIT 6 (HL)", 1, 16, bit6),
 	// 374
-	op,
+	operation("BIT 6 A", 1, 8, bit6),
 	// 375
 	operation("BIT 7, B", 1, 8, bit7),
 	// 376
@@ -778,7 +778,7 @@ operation inst_set[512] = {
 	// 381
 	operation("BIT 7, (HL)", 1, 16, bit7),
 	// 382
-	op,
+	operation("BIT 7, A", 1, 8, bit7),
 	// 383
 	operation("RES 0 B", 1, 8, res0),
 	// 384
