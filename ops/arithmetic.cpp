@@ -861,3 +861,48 @@ int bit1(cpu* c)
     c->subtract = 0;
     return 1;
 }
+
+
+int srl(cpu* c)
+{
+    // extended instruction
+    // shift right register into carry
+    // highest bit is set to 0
+    uint8_t opcode = c->read(c->pc);
+    c->t = 8;
+    uint8_t* reg;
+    if (opcode == 0x38)
+        reg = &(c->b);
+    else if (opcode == 0x39)
+        reg = &(c->c);
+    else if (opcode == 0x3a)
+        reg = &(c->d);
+    else if (opcode == 0x3b)
+        reg = &(c->e);
+    else if (opcode == 0x3c)
+        reg = &(c->h);
+    else if (opcode == 0x3d)
+        reg = &(c->l);
+    else if (opcode == 0x3e)
+    {
+        c->t = 16;
+        uint16_t addr = c->h;
+        addr = (addr << 8) | c->l;
+        uint8_t val = c->read(addr);
+        c->carry = val & 1;
+        val >>= 1;
+        c->write(addr, val);
+        c->zero = (val == 0);
+        c->half_carry = c->subtract = 0;
+        return 1;
+    }
+    else if (opcode == 0x3f)
+        reg = &(c->a);
+
+    c->half_carry = c->subtract = 0;
+    uint8_t val = (*reg) >> 1;
+    c->zero = (val == 0);
+    c->carry = (*reg) & 1;
+    *reg = val;
+    return 1;
+}

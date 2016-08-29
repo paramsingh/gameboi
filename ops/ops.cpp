@@ -636,21 +636,21 @@ operation inst_set[512] = {
 	// 310
 	operation("SWAP A", 1, 8, swapop),
 	// 311
-	op,
+	operation("SRL B", 1, 8, srl),
 	// 312
-	op,
+	operation("SRL C", 1, 8, srl),
 	// 313
-	op,
+	operation("SRL D", 1, 8, srl),
 	// 314
-	op,
+	operation("SRL E", 1, 8, srl),
 	// 315
-	op,
+	operation("SRL H", 1, 8, srl),
 	// 316
-	op,
+	operation("SRL L", 1, 8, srl),
 	// 317
-	op,
+	operation("SRL (HL)", 1, 16, srl),
 	// 318
-	op,
+	operation("SRL A", 1, 8, srl),
 	// 319
 	operation("BIT 0 B", 1, 8, bit0),
 	// 320
