@@ -1,7 +1,7 @@
 struct gpu
 {
     // values in the pixels
-    int pixels[160][144];
+    int pixels[160][144][3];
     // value in the clock of the gpu
     int clock;
     // the mode in which the gpu is
@@ -45,6 +45,6 @@ struct gpu
 
     void draw_pixels();
 
-    int getcolor(int);
+    int getcolor(int, uint16_t);
     int cnt;
 };

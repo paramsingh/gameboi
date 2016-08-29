@@ -264,15 +264,33 @@ void gpu::render_tiles()
         uint8_t req_bit = 7 - (x % 8);
         uint8_t bit1 = (byte1 >> req_bit) & 1;
         uint8_t bit2 = (byte2 >> req_bit) & 1;
-        uint8_t color = (bit1 << 1) | bit2;
-        pixels[i][line] = color;
+        uint8_t colorid = (bit1 << 1) | bit2;
+        int color = getcolor(colorid, 0xff47);
+
+        int red, blue, green;
+        if (color == 0) // white
+            red = blue = green = 0xff;
+        else if (color == 1) // light gray
+            red = 0xcc, blue = 0xcc, green = 0xcc;
+        else if (color == 2) // dark gray
+            red = 0x77, blue = 0x77, green = 0x77;
+        else
+            red = blue = green = 0;
+
+        pixels[i][line][0] = red;
+        pixels[i][line][1] = blue;
+        pixels[i][line][2] = green;
+
     }
 }
 
-int gpu::getcolor(int id)
+int gpu::getcolor(int id, uint16_t palette)
 {
-    // always black so far
-    return 0;
+    uint8_t data = c->read(palette);
+    int hi = 2 * id + 1, lo = 2 * id;
+    int bit1 = (data >> hi) & 1;
+    int bit0 = (data >> lo) & 1;
+    return (bit1 << 1) | bit0;
 }
 
 void gpu::draw_pixels()
@@ -280,19 +298,9 @@ void gpu::draw_pixels()
     for (int i = 0; i < 144; i++)
     {
         for (int j = 0; j < 160; j++) {
-            int color = pixels[j][i];
-            // TODO: get accurate color and draw correctly
-            if (color == 0)
-            {
-                SDL_SetRenderDrawColor(screen->renderer, 0xff, 0xff, 0xff, 0xFF);
-                SDL_RenderDrawPoint(screen->renderer, j, i);
-
-            }
-            else
-            {
-                SDL_SetRenderDrawColor(screen->renderer, 0x00, 0x00, 0x00, 0xFF);
-                SDL_RenderDrawPoint(screen->renderer, j, i);
-            }
+            int red = pixels[j][i][0], blue = pixels[j][i][1], green = pixels[j][i][2];
+            SDL_SetRenderDrawColor(screen->renderer, red, blue, green, 0xFF);
+            SDL_RenderDrawPoint(screen->renderer, j, i);
         }
     }
     SDL_RenderPresent(screen->renderer);
