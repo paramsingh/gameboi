@@ -2,7 +2,6 @@
 
 Gameboi is a Nintendo Gameboy emulator written in C++. It uses SDL2 for the GUI.
 
-Written by Param.
 
 ## Screenshots
 
